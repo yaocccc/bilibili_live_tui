@@ -1,0 +1,14 @@
+.idea/
+.vscode/
+node_modules/
+dist/
+tmp/
+temp/
+logs/
+*.log
+**/dump.rdb
+**/.DS_Store
+bin/danmu_geter
+bin/danmu_sender
+
+**/config.toml
