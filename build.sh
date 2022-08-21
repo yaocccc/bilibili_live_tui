@@ -6,4 +6,5 @@ go build -o $_dir/bin/danmu_geter main.go
 cd $_dir/danmu_sender
 go build -o $_dir/bin/danmu_sender main.go
 
+cp $_dir/bin/config.toml $_dir/bin/config.tomlbak
 cp $_dir/config.toml $_dir/bin/config.toml

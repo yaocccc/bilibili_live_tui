@@ -67,6 +67,13 @@ func initBilibili() {
 	go heartbeat()
 }
 
+func splitMsg(msg string) []string {
+	if len(msg) <= 20 {
+		return []string{msg}
+	}
+	return strings.Split(msg, " ")
+}
+
 func reqHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
 		return

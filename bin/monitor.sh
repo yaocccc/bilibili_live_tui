@@ -1,7 +1,7 @@
-cd ~/workspace/go/src/bilibili/bin
+cd "$(dirname "${BASH_SOURCE[0]}")"
 ./danmu_sender &
-~/scripts/dwm-status.sh
 ./danmu_geter | while read line
 do
+    echo "$line" >> ~/bililog
     notify-send "$line"
 done
