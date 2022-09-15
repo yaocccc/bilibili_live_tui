@@ -9,5 +9,6 @@ require (
 	github.com/gorilla/websocket v1.4.2
 	github.com/iyear/biligo v0.1.5 // indirect
 	github.com/marcusolsson/tui-go v0.4.0 // indirect
-	github.com/tidwall/gjson v1.8.1
+	github.com/tidwall/gjson v1.14.3
+	google.golang.org/protobuf v1.28.1 // indirect
 )

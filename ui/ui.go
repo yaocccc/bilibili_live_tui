@@ -44,7 +44,7 @@ func Run(roomId int64, busChan chan []string) {
 	chat.SetSizePolicy(tui.Expanding, tui.Expanding)
 
 	input.OnSubmit(func(e *tui.Entry) {
-		sender.SendMsg(roomId, e.Text())
+		sender.SendMsg(roomId, e.Text(), busChan)
 		input.SetText("")
 	})
 
