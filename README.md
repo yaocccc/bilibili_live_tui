@@ -1,4 +1,4 @@
-# bilibili danmu over by go
+# bilibili 直播间 TUI
 
 项目文件:
 
