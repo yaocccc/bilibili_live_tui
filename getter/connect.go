@@ -1,4 +1,4 @@
-package danmu
+package getter
 
 import (
 	"encoding/json"
@@ -10,9 +10,7 @@ import (
 	"github.com/tidwall/gjson"
 )
 
-var (
-	getDanmuInfo = "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=%d&type=0"
-)
+var getDanmuInfo = "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=%d&type=0"
 
 type handShakeInfo struct {
 	UID       uint8  `json:"uid"`
@@ -86,17 +84,13 @@ func (d *DanmuClient) receiveRawMsg() {
 			for _, m := range msgs {
 				d.unzlibChannel <- m
 			}
-		} else if msg[11] == 3 {
-			d.heartBeatChannel <- msg
-		} else {
-			d.serverNoticeChannel <- msg
 		}
 	}
 }
 
-func (d *DanmuClient) Run() {
+func (d *DanmuClient) Run(busChan chan string) {
 	d.connect()
-	go d.process()
+	go d.process(busChan)
 	go d.heartBeat()
 	go d.receiveRawMsg()
 }

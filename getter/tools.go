@@ -1,4 +1,4 @@
-package danmu
+package getter
 
 import (
 	"bytes"
@@ -98,11 +98,11 @@ func splitMsg(src []byte) (msgs [][]byte) {
 }
 
 func BytesToStringFast(b []byte) string {
-    return *(*string)(unsafe.Pointer(&b))
+	return *(*string)(unsafe.Pointer(&b))
 }
 
 func StringToBytes(s string) []byte {
-    sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
-    bh := reflect.SliceHeader{sh.Data, sh.Len, 0}
-    return *(*[]byte)(unsafe.Pointer(&bh))
+	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	bh := reflect.SliceHeader{sh.Data, sh.Len, 0}
+	return *(*[]byte)(unsafe.Pointer(&bh))
 }

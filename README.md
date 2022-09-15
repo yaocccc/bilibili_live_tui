@@ -1,26 +1,16 @@
-# bilibili danmu
+# bilibili danmu over by go
 
-服务文件:
+项目文件:
 
 ```plaintext
-  bin/danmu_sender: 发送弹幕的服务
-  bin/danmu_geter:  查看弹幕的服务
+  sender 发送弹幕的实现
+  getter 获取弹幕的实现
+  ui     TUI的实现
 ```
 
-配置文件:
+配置文件: config.toml 仓库内不带 请自己 从 config.toml.demo 复制修改
 
 ```plaintext
   Cookie: cookie信息 从web端找一个请求头复制cookie
   RoomId: 指定直播间roomId
 ```
-
-## 使用
-
-需要自己定义config.toml(可以从config.example.toml复制修改)
-
-先执行
-./build.sh
-
-再进入 bin 执行
-
-可以参考 里面的run脚本
