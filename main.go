@@ -23,7 +23,7 @@ func init() {
 }
 
 func main() {
-	busChan := make(chan string, 100)
+	busChan := make(chan []string, 100)
 	getter.Run(config.RoomId, busChan)
 	sender.Run(config.Cookie)
 	ui.Run(config.RoomId, busChan)

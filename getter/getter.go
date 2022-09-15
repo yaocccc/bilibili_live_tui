@@ -26,7 +26,7 @@ type receivedInfo struct {
 	Scatter    map[string]interface{} `json:"scatter"`
 }
 
-func Run(roomID int64, busChan chan string) {
+func Run(roomID int64, busChan chan []string) {
 	dc := DanmuClient{
 		roomID:        uint32(roomID),
 		conn:          new(websocket.Conn),

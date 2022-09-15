@@ -5,29 +5,36 @@ import (
 	"fmt"
 )
 
-func (d *DanmuClient) process(busChan chan string) {
+func (d *DanmuClient) process(busChan chan []string) {
 	for msg := range d.unzlibChannel {
 		uz := msg[16:]
 		js := new(receivedInfo)
 		json.Unmarshal(uz, js)
-		m := ""
+		m := make([]string, 2)
 		switch js.Cmd {
 		case "COMBO_SEND":
-			m = fmt.Sprintf("%s 送给 %s %d 个 %s", js.Data["uname"].(string), js.Data["r_uname"].(string), int(js.Data["combo_num"].(float64)), js.Data["gift_name"].(string))
+			m[0] = js.Data["uname"].(string)
+			m[1] = fmt.Sprintf("送给 %s %d 个 %s", js.Data["r_uname"].(string), int(js.Data["combo_num"].(float64)), js.Data["gift_name"].(string))
 		case "DANMU_MSG":
-			m = fmt.Sprintf("%s: %s", js.Info[2].([]interface{})[1].(string), js.Info[1].(string))
+			m[0] = js.Info[2].([]interface{})[1].(string)
+			m[1] = js.Info[1].(string)
 		case "GUARD_BUY":
-			m = fmt.Sprintf("%s 购买了 %s", js.Data["username"].(string), js.Data["gift_name"].(string))
+			m[0] = js.Data["username"].(string)
+			m[1] = fmt.Sprintf("购买了 %s", js.Data["giftName"].(string))
 		case "INTERACT_WORD":
-			m = fmt.Sprintf("%s 进入了房间", js.Data["uname"].(string))
+			m[0] = js.Data["uname"].(string)
+			m[1] = "进入了房间"
 		case "SEND_GIFT":
-			m = fmt.Sprintf("%s 投喂了 %d 个 %s", js.Data["uname"].(string), int(js.Data["num"].(float64)), js.Data["giftName"].(string))
+			m[0] = js.Data["uname"].(string)
+			m[1] = fmt.Sprintf("投喂了 %d 个 %s", int(js.Data["num"].(float64)), js.Data["giftName"].(string))
 		case "USER_TOAST_MSG":
-			m = js.Data["toast_msg"].(string)
+			m[0] = "system"
+			m[1] = js.Data["toast_msg"].(string)
 		case "LIVE_INTERACTIVE_GAME":
 			continue
 		case "NOTICE_MSG":
-			m = js.MsgSelf
+			m[0] = "system"
+			m[1] = js.MsgSelf
 		case "LIVE":
 			continue
 		case "ACTIVITY_BANNER_UPDATE_V2":

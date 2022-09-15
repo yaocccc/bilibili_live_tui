@@ -2,22 +2,25 @@ package ui
 
 import (
 	"bili/sender"
+	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/marcusolsson/tui-go"
 )
 
-func Run(roomId int64, busChan chan string) {
+func Run(roomId int64, busChan chan []string) {
 	sidebar := tui.NewVBox(
-		tui.NewLabel("直播间: 123123"),
-		tui.NewLabel("coding"),
 		tui.NewLabel(""),
-		tui.NewLabel("👀 100"),
-		tui.NewLabel("🔥 2w"),
+		tui.NewLabel("直播间"),
+		tui.NewLabel(fmt.Sprintf("%d", roomId)),
+		tui.NewLabel(""),
+		tui.NewLabel("coding"),
 		tui.NewSpacer(),
 	)
 	sidebar.SetBorder(true)
+	sidebar.SetTitle("Room")
 
 	history := tui.NewVBox()
 
@@ -26,6 +29,7 @@ func Run(roomId int64, busChan chan string) {
 
 	historyBox := tui.NewVBox(historyScroll)
 	historyBox.SetBorder(true)
+	historyBox.SetTitle("History")
 
 	input := tui.NewEntry()
 	input.SetFocused(true)
@@ -34,6 +38,7 @@ func Run(roomId int64, busChan chan string) {
 	inputBox := tui.NewHBox(input)
 	inputBox.SetBorder(true)
 	inputBox.SetSizePolicy(tui.Expanding, tui.Maximum)
+	inputBox.SetTitle("Send")
 
 	chat := tui.NewVBox(historyBox, inputBox)
 	chat.SetSizePolicy(tui.Expanding, tui.Expanding)
@@ -50,19 +55,27 @@ func Run(roomId int64, busChan chan string) {
 		log.Fatal(err)
 	}
 
-	ui.SetKeybinding("Esc", func() { ui.Quit() })
-
+	history.Append(tui.NewLabel("."))
+	var lastLabel *tui.Label
 	go func() {
 		for msg := range busChan {
-			history.Append(tui.NewHBox(
-				tui.NewLabel(time.Now().Format("15:04")),
-				tui.NewPadder(1, 0, tui.NewLabel(msg)),
-				tui.NewSpacer(),
-			))
+			if strings.Trim(msg[1], " ") == "" {
+				continue
+			}
+			if lastLabel != nil {
+				lastLabel.SetText(strings.Replace(lastLabel.Text(), "└─ ", "├─ ", 1))
+				lastLabel.SetStyleName("")
+			}
+			label1 := tui.NewLabel(fmt.Sprintf("├─ %s %s", time.Now().Format("15:04"), msg[0]))
+			label2 := tui.NewLabel(fmt.Sprintf("└─ %s", msg[1]))
+			history.Append(label1)
+			history.Append(label2)
+			lastLabel = label2
 			ui.Update(func() {})
 		}
 	}()
 
+	ui.SetKeybinding("Esc", func() { ui.Quit() })
 	if err := ui.Run(); err != nil {
 		log.Fatal(err)
 	}

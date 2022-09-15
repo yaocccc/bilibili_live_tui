@@ -48,15 +48,13 @@ func Run(cookie string) {
 }
 
 func SendMsg(roomId int64, msg string) {
-	r := []string{}
-	for i := 0; i < len(msg); i += 20 {
-		if i+20 < len(msg) {
-			r = append(r, msg[i:i+20])
+	msgRune := []rune(msg)
+	for i := 0; i < len(msgRune); i += 20 {
+		if i+20 < len(msgRune) {
+			b.LiveSendDanmaku(roomId, 16777215, 25, 1, string(msgRune[i:i+20]), 0)
+			time.Sleep(time.Second * 1)
 		} else {
-			r = append(r, msg[i:])
+			b.LiveSendDanmaku(roomId, 16777215, 25, 1, string(msgRune[i:]), 0)
 		}
-	}
-	for _, v := range r {
-		b.LiveSendDanmaku(roomId, 16777215, 25, 1, v, 0)
 	}
 }

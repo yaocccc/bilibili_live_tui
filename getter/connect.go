@@ -88,7 +88,7 @@ func (d *DanmuClient) receiveRawMsg() {
 	}
 }
 
-func (d *DanmuClient) Run(busChan chan string) {
+func (d *DanmuClient) Run(busChan chan []string) {
 	d.connect()
 	go d.process(busChan)
 	go d.heartBeat()
