@@ -1,5 +1,7 @@
 # bilibili 直播间 TUI
 
+![show](show.gif)
+
 项目文件:
 
 ```plaintext
