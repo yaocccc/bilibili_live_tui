@@ -8,8 +8,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"reflect"
-	"unsafe"
 
 	"github.com/gorilla/websocket"
 )
@@ -95,14 +93,4 @@ func splitMsg(src []byte) (msgs [][]byte) {
 		}
 	}
 	return msgs
-}
-
-func BytesToStringFast(b []byte) string {
-	return *(*string)(unsafe.Pointer(&b))
-}
-
-func StringToBytes(s string) []byte {
-	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
-	bh := reflect.SliceHeader{sh.Data, sh.Len, 0}
-	return *(*[]byte)(unsafe.Pointer(&bh))
 }
