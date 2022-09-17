@@ -4,6 +4,7 @@ import (
 	"bili/getter"
 	"bili/sender"
 	"bili/ui"
+	"flag"
 	"fmt"
 	"strings"
 
@@ -20,7 +21,8 @@ var config Config
 var auth bg.CookieAuth
 
 func init() {
-	if _, err := toml.DecodeFile("config.toml", &config); err != nil {
+	configFile := flag.String("c", "config.toml", "config file")
+	if _, err := toml.DecodeFile(*configFile, &config); err != nil {
 		fmt.Printf("Error decoding config.toml: %s\n", err)
 	}
 

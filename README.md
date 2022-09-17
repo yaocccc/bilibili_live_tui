@@ -2,6 +2,8 @@
 
 ![show](show.gif)
 
+[关联的bilibili介绍视频](https://www.bilibili.com/video/bv1gG411G7XG)
+
 项目文件:
 
 ```plaintext
@@ -16,3 +18,7 @@
   Cookie: cookie信息 从web端找一个请求头复制cookie
   RoomId: 指定直播间roomId
 ```
+
+使用:
+
+go run main.go -c config.toml
