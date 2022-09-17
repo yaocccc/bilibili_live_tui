@@ -21,8 +21,10 @@ var config Config
 var auth bg.CookieAuth
 
 func init() {
-	configFile := flag.String("c", "config.toml", "config file")
-	if _, err := toml.DecodeFile(*configFile, &config); err != nil {
+	configFile := ""
+	flag.StringVar(&configFile, "c", "config.toml", "usage for config")
+	flag.Parse()
+	if _, err := toml.DecodeFile(configFile, &config); err != nil {
 		fmt.Printf("Error decoding config.toml: %s\n", err)
 	}
 
