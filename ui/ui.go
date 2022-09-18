@@ -19,7 +19,7 @@ type RoomInfoLabels struct {
 	attentionLabel *tui.Label
 }
 
-func layoutSidebar(roomInfoChan chan getter.RoomInfo) (tui.Widget, RoomInfoLabels, *tui.Box) {
+func layoutSidebar(roomInfoChan chan getter.RoomInfo) (tui.Widget, *tui.Box, RoomInfoLabels, *tui.Box) {
 	labels := RoomInfoLabels{
 		titleLabel:     tui.NewLabel("--------"),
 		roomIdLabel:    tui.NewLabel("ID: -----"),
@@ -47,10 +47,10 @@ func layoutSidebar(roomInfoChan chan getter.RoomInfo) (tui.Widget, RoomInfoLabel
 
 	rankUsersBox := tui.NewVBox(rankUsersScroll)
 	rankUsersBox.SetBorder(true)
-	rankUsersBox.SetTitle("Rank")
+	rankUsersBox.SetTitle("Rank(0)")
 
 	sidebar := tui.NewVBox(roomInfo, rankUsersBox)
-	return sidebar, labels, rankUsers
+	return sidebar, rankUsersBox, labels, rankUsers
 }
 
 func layoutChat(roomId int64, busChan chan []string) (chat *tui.Box, history *tui.Box, input *tui.Entry) {
@@ -76,7 +76,7 @@ func layoutChat(roomId int64, busChan chan []string) (chat *tui.Box, history *tu
 	chat.SetSizePolicy(tui.Expanding, tui.Expanding)
 
 	input.OnSubmit(func(e *tui.Entry) {
-		sender.SendMsg(roomId, e.Text(), busChan)
+		go sender.SendMsg(roomId, e.Text(), busChan)
 		input.SetText("")
 	})
 
@@ -85,13 +85,14 @@ func layoutChat(roomId int64, busChan chan []string) (chat *tui.Box, history *tu
 	return chat, history, input
 }
 
-func roomInfoHandler(ui tui.UI, roomInfoLabels RoomInfoLabels, rankUsers *tui.Box, roomInfoChan chan getter.RoomInfo) {
+func roomInfoHandler(ui tui.UI, rankUsersBox *tui.Box, roomInfoLabels RoomInfoLabels, rankUsers *tui.Box, roomInfoChan chan getter.RoomInfo) {
 	for roomInfo := range roomInfoChan {
 		roomInfoLabels.titleLabel.SetText(roomInfo.Title)
 		roomInfoLabels.roomIdLabel.SetText(fmt.Sprintf("ID: %d", roomInfo.RoomId))
 		roomInfoLabels.areaLabel.SetText(fmt.Sprintf("%s/%s", roomInfo.ParentAreaName, roomInfo.AreaName))
 		roomInfoLabels.onlineLabel.SetText(fmt.Sprintf("👀: %d", roomInfo.Online))
 		roomInfoLabels.attentionLabel.SetText(fmt.Sprintf("❤️ : %d", roomInfo.Attention))
+		rankUsersBox.SetTitle(fmt.Sprintf("Rank(%d)", len(roomInfo.OnlineRankUsers)))
 
 		for rankUsers.Length() > 0 {
 			rankUsers.Remove(0)
@@ -127,7 +128,7 @@ func danmuHandler(ui tui.UI, history *tui.Box, lastLabel *tui.Label, roomId int6
 }
 
 func Run(roomId int64, busChan chan []string, roomInfoChan chan getter.RoomInfo) {
-	sidebar, roomInfoLabels, rankUsers := layoutSidebar(roomInfoChan)
+	sidebar, rankUsersBox, roomInfoLabels, rankUsers := layoutSidebar(roomInfoChan)
 	chat, history, input := layoutChat(roomId, busChan)
 
 	root := tui.NewHBox(sidebar, chat)
@@ -139,7 +140,7 @@ func Run(roomId int64, busChan chan []string, roomInfoChan chan getter.RoomInfo)
 
 	var lastLabel *tui.Label
 	go danmuHandler(ui, history, lastLabel, roomId, busChan)
-	go roomInfoHandler(ui, roomInfoLabels, rankUsers, roomInfoChan)
+	go roomInfoHandler(ui, rankUsersBox, roomInfoLabels, rankUsers, roomInfoChan)
 
 	ui.SetKeybinding("Esc", func() { ui.Quit() })
 	ui.SetKeybinding("Ctrl+c", func() { ui.Quit() })
