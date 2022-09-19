@@ -124,18 +124,23 @@ func danmuHandler(ui tui.UI, history *tui.Box, lastLabel *tui.Label, roomId int6
 		if strings.Trim(msg.Content, " ") == "" {
 			continue
 		}
-		if lastLabel != nil {
-			lastLabel.SetText(strings.Replace(lastLabel.Text(), "└─ ", "│  ", 1))
-			lastLabel.SetStyleName("")
-		}
-		label1 := tui.NewLabel(fmt.Sprintf("├─ %s %s", time.Now().Format("15:04"), msg.Author))
-		label2 := tui.NewLabel(fmt.Sprintf("└─ %s", msg.Content))
+		// 如果是一条新的用户或新的类型的弹幕，新建一个会话
 		if lastMsg.Type != msg.Type || lastMsg.Author != msg.Author {
-			history.Append(label1)
+			history.Append(
+				tui.NewLabel(fmt.Sprintf("┌─ %s %s", time.Now().Format("15:04"), msg.Author)),
+			)
+		} else {
+			if lastLabel != nil {
+				lastLabel.SetText(strings.Replace(lastLabel.Text(), "└─ ", "│  ", 1))
+				lastLabel.SetStyleName("")
+			}
 		}
-		history.Append(label2)
+
+		label := tui.NewLabel(fmt.Sprintf("└─ %s", msg.Content))
+		history.Append(label)
+		lastLabel = label
+
 		lastMsg = msg
-		lastLabel = label2
 		ui.Update(func() {})
 	}
 }
