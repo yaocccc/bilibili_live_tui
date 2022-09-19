@@ -189,14 +189,17 @@ func (d *DanmuClient) syncRoomInfo(roomInfoChan chan RoomInfo) {
 			roomInfo.ParentAreaName = gjson.Get(r1.Text(), "data.parent_area_name").String()
 			roomInfo.Online = gjson.Get(r1.Text(), "data.online").Int()
 			roomInfo.Attention = gjson.Get(r1.Text(), "data.attention").Int()
-			_time, _ := time.Parse("2006-01-02 03:04:05", gjson.Get(r1.Text(), "data.live_time").String())
-			days := int(time.Since(_time).Hours() / 24)
-			hours := int(time.Since(_time).Hours()+8) % 24
-			minutes := int(time.Since(_time).Minutes()) % 60
+			_time, _ := time.Parse("2006-01-02 15:04:05", gjson.Get(r1.Text(), "data.live_time").String())
+			seconds := time.Now().Unix() - _time.Unix() + 8*60*60
+			days := seconds / 86400
+			hours := (seconds % 86400) / 3600
+			minutes := (seconds % 3600) / 60
 			if days > 0 {
-				roomInfo.Time = fmt.Sprintf("%dd%dh%dm", days, hours, minutes)
+				roomInfo.Time = fmt.Sprintf("%d天%d时%d分", days, hours, minutes)
+			} else if hours > 0 {
+				roomInfo.Time = fmt.Sprintf("%d时%d分", hours, minutes)
 			} else {
-				roomInfo.Time = fmt.Sprintf("%dh%dm", hours, minutes)
+				roomInfo.Time = fmt.Sprintf("%d分", minutes)
 			}
 		}
 		if err2 == nil {
