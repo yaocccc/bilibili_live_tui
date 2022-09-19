@@ -35,6 +35,12 @@ type RoomInfo struct {
 	OnlineRankUsers []OnlineRankUser
 }
 
+type DanmuMsg struct {
+	Author  string
+	Content string
+	Type    string
+}
+
 type receivedInfo struct {
 	Cmd        string                 `json:"cmd"`
 	Data       map[string]interface{} `json:"data"`
@@ -118,7 +124,7 @@ func (d *DanmuClient) heartBeat() {
 		time.Sleep(30 * time.Second)
 	}
 }
-func (d *DanmuClient) receiveRawMsg(busChan chan []string) {
+func (d *DanmuClient) receiveRawMsg(busChan chan DanmuMsg) {
 	for {
 		_, rawMsg, _ := d.conn.ReadMessage()
 		if rawMsg[7] == 2 {
@@ -127,32 +133,37 @@ func (d *DanmuClient) receiveRawMsg(busChan chan []string) {
 				uz := msg[16:]
 				js := new(receivedInfo)
 				json.Unmarshal(uz, js)
-				m := make([]string, 2)
+				m := DanmuMsg{}
 				switch js.Cmd {
 				case "COMBO_SEND":
-					m[0] = js.Data["uname"].(string)
-					m[1] = fmt.Sprintf("送给 %s %d 个 %s", js.Data["r_uname"].(string), int(js.Data["combo_num"].(float64)), js.Data["gift_name"].(string))
+					m.Type = "COMBO_SEND"
+					m.Author = js.Data["uname"].(string)
+					m.Content = fmt.Sprintf("送给 %s %d 个 %s", js.Data["r_uname"].(string), int(js.Data["combo_num"].(float64)), js.Data["gift_name"].(string))
 				case "DANMU_MSG":
-					m[0] = js.Info[2].([]interface{})[1].(string)
-					m[1] = js.Info[1].(string)
+					m.Type = "DANMU_MSG"
+					m.Author = js.Info[2].([]interface{})[1].(string)
+					m.Content = js.Info[1].(string)
 				case "GUARD_BUY":
-					m[0] = js.Data["username"].(string)
-					m[1] = fmt.Sprintf("购买了 %s", js.Data["giftName"].(string))
+					m.Type = "GUARD_BUY"
+					m.Author = js.Data["username"].(string)
+					m.Content = fmt.Sprintf("购买了 %s", js.Data["giftName"].(string))
 				case "INTERACT_WORD":
-					m[0] = js.Data["uname"].(string)
-					m[1] = "进入了房间"
+					m.Type = "INTERACT_WORD"
+					m.Author = js.Data["uname"].(string)
+					m.Content = "进入了房间"
 				case "SEND_GIFT":
-					m[0] = js.Data["uname"].(string)
-					m[1] = fmt.Sprintf("投喂了 %d 个 %s", int(js.Data["num"].(float64)), js.Data["giftName"].(string))
+					m.Type = "SEND_GIFT"
+					m.Author = js.Data["uname"].(string)
+					m.Content = fmt.Sprintf("投喂了 %d 个 %s", int(js.Data["num"].(float64)), js.Data["giftName"].(string))
 				case "USER_TOAST_MSG":
-					m[0] = "system"
-					m[1] = js.Data["toast_msg"].(string)
-				case "LIVE_INTERACTIVE_GAME":
-					continue
+					m.Type = "USER_TOAST_MSG"
+					m.Author = "system"
+					m.Content = js.Data["toast_msg"].(string)
 				case "NOTICE_MSG":
-					m[0] = "system"
-					m[1] = js.MsgSelf
-				default: // "LIVE" "ACTIVITY_BANNER_UPDATE_V2" "ONLINE_RANK_COUNT" "ONLINE_RANK_TOP3" "ONLINE_RANK_V2" "PANEL" "PREPARING" "WIDGET_BANNER"
+					m.Type = "NOTICE_MSG"
+					m.Author = "system"
+					m.Content = js.MsgSelf
+				default: // "LIVE" "ACTIVITY_BANNER_UPDATE_V2" "ONLINE_RANK_COUNT" "ONLINE_RANK_TOP3" "ONLINE_RANK_V2" "PANEL" "PREPARING" "WIDGET_BANNER" "LIVE_INTERACTIVE_GAME"
 					continue
 				}
 				busChan <- m
@@ -195,7 +206,7 @@ func (d *DanmuClient) syncRoomInfo(roomInfoChan chan RoomInfo) {
 	}
 }
 
-func Run(roomID int64, auth bg.CookieAuth, busChan chan []string, roomInfoChan chan RoomInfo) {
+func Run(roomID int64, auth bg.CookieAuth, busChan chan DanmuMsg, roomInfoChan chan RoomInfo) {
 	dc := DanmuClient{
 		roomID:        uint32(roomID),
 		auth:          auth,

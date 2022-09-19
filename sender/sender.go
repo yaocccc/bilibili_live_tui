@@ -1,6 +1,7 @@
 package sender
 
 import (
+	"bili/getter"
 	"fmt"
 	"os"
 	"time"
@@ -21,7 +22,7 @@ func heartbeat() {
 	time.AfterFunc(time.Second*10, heartbeat)
 }
 
-func SendMsg(roomId int64, msg string, busChan chan []string) {
+func SendMsg(roomId int64, msg string, busChan chan getter.DanmuMsg) {
 	msgRune := []rune(msg)
 	for i := 0; i < len(msgRune); i += 20 {
 		err = nil
@@ -32,7 +33,7 @@ func SendMsg(roomId int64, msg string, busChan chan []string) {
 			err = bc.LiveSendDanmaku(roomId, 16777215, 25, 1, string(msgRune[i:]), 0)
 		}
 		if err != nil {
-			busChan <- []string{"error", err.Error()}
+			busChan <- getter.DanmuMsg{Author: "system", Content: "发送弹幕失败", Type: ""}
 		}
 	}
 }

@@ -19,6 +19,9 @@ type RoomInfoLabels struct {
 	attentionLabel *tui.Label
 }
 
+var submitHistory = []string{}
+var submitHistoryIndex = 0
+
 func layoutSidebar(roomInfoChan chan getter.RoomInfo) (tui.Widget, *tui.Box, RoomInfoLabels, *tui.Box) {
 	labels := RoomInfoLabels{
 		titleLabel:     tui.NewLabel("--------"),
@@ -53,7 +56,7 @@ func layoutSidebar(roomInfoChan chan getter.RoomInfo) (tui.Widget, *tui.Box, Roo
 	return sidebar, rankUsersBox, labels, rankUsers
 }
 
-func layoutChat(roomId int64, busChan chan []string) (chat *tui.Box, history *tui.Box, input *tui.Entry) {
+func layoutChat(roomId int64, busChan chan getter.DanmuMsg) (chat *tui.Box, history *tui.Box, input *tui.Entry) {
 	history = tui.NewVBox()
 
 	historyScroll := tui.NewScrollArea(history)
@@ -77,10 +80,12 @@ func layoutChat(roomId int64, busChan chan []string) (chat *tui.Box, history *tu
 
 	input.OnSubmit(func(e *tui.Entry) {
 		go sender.SendMsg(roomId, e.Text(), busChan)
+
+		submitHistory = append(submitHistory, e.Text())
+		submitHistoryIndex = len(submitHistory)
+
 		input.SetText("")
 	})
-
-	history.Append(tui.NewLabel("."))
 
 	return chat, history, input
 }
@@ -109,25 +114,30 @@ func roomInfoHandler(ui tui.UI, rankUsersBox *tui.Box, roomInfoLabels RoomInfoLa
 	}
 }
 
-func danmuHandler(ui tui.UI, history *tui.Box, lastLabel *tui.Label, roomId int64, busChan chan []string) {
+var lastMsg = getter.DanmuMsg{}
+
+func danmuHandler(ui tui.UI, history *tui.Box, lastLabel *tui.Label, roomId int64, busChan chan getter.DanmuMsg) {
 	for msg := range busChan {
-		if strings.Trim(msg[1], " ") == "" {
+		if strings.Trim(msg.Content, " ") == "" {
 			continue
 		}
 		if lastLabel != nil {
-			lastLabel.SetText(strings.Replace(lastLabel.Text(), "└─ ", "├─ ", 1))
+			lastLabel.SetText(strings.Replace(lastLabel.Text(), "└─ ", "│  ", 1))
 			lastLabel.SetStyleName("")
 		}
-		label1 := tui.NewLabel(fmt.Sprintf("├─ %s %s", time.Now().Format("15:04"), msg[0]))
-		label2 := tui.NewLabel(fmt.Sprintf("└─ %s", msg[1]))
-		history.Append(label1)
+		label1 := tui.NewLabel(fmt.Sprintf("├─ %s %s", time.Now().Format("15:04"), msg.Author))
+		label2 := tui.NewLabel(fmt.Sprintf("└─ %s", msg.Content))
+		if lastMsg.Type != msg.Type || lastMsg.Author != msg.Author {
+			history.Append(label1)
+		}
 		history.Append(label2)
+		lastMsg = msg
 		lastLabel = label2
 		ui.Update(func() {})
 	}
 }
 
-func Run(roomId int64, busChan chan []string, roomInfoChan chan getter.RoomInfo) {
+func Run(roomId int64, busChan chan getter.DanmuMsg, roomInfoChan chan getter.RoomInfo) {
 	sidebar, rankUsersBox, roomInfoLabels, rankUsers := layoutSidebar(roomInfoChan)
 	chat, history, input := layoutChat(roomId, busChan)
 
@@ -145,6 +155,26 @@ func Run(roomId int64, busChan chan []string, roomInfoChan chan getter.RoomInfo)
 	ui.SetKeybinding("Esc", func() { ui.Quit() })
 	ui.SetKeybinding("Ctrl+c", func() { ui.Quit() })
 	ui.SetKeybinding("Ctrl+u", func() { input.SetText("") })
+	ui.SetKeybinding("up", func() {
+		if len(submitHistory) == 0 {
+			return
+		}
+		submitHistoryIndex -= 1
+		if submitHistoryIndex < 0 {
+			submitHistoryIndex = len(submitHistory) - 1
+		}
+		input.SetText(submitHistory[submitHistoryIndex])
+	})
+	ui.SetKeybinding("down", func() {
+		if len(submitHistory) == 0 {
+			return
+		}
+		submitHistoryIndex += 1
+		if submitHistoryIndex > len(submitHistory)-1 {
+			submitHistoryIndex = 0
+		}
+		input.SetText(submitHistory[submitHistoryIndex])
+	})
 
 	if err := ui.Run(); err != nil {
 		log.Fatal(err)

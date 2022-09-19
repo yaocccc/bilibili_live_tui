@@ -22,3 +22,11 @@
 使用:
 
 go run main.go -c config.toml
+
+快捷键:
+
+1. <esc> 退出
+2. <ctrl+c> 退出
+3. <ctrl+u> 清空输入内容
+4. <up> 上一个输入记录
+4. <down> 下一个输入记录

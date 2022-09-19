@@ -43,7 +43,7 @@ func init() {
 }
 
 func main() {
-	busChan := make(chan []string, 100)
+	busChan := make(chan getter.DanmuMsg, 100)
 	roomInfoChan := make(chan getter.RoomInfo, 100)
 	getter.Run(config.RoomId, auth, busChan, roomInfoChan)
 	sender.Run(auth)
