@@ -17,6 +17,7 @@ type RoomInfoLabels struct {
 	areaLabel      *tui.Label
 	onlineLabel    *tui.Label
 	attentionLabel *tui.Label
+	timeLabel      *tui.Label
 }
 
 var submitHistory = []string{}
@@ -29,6 +30,7 @@ func layoutSidebar(roomInfoChan chan getter.RoomInfo) (tui.Widget, *tui.Box, Roo
 		areaLabel:      tui.NewLabel("----/----"),
 		onlineLabel:    tui.NewLabel("👀: --"),
 		attentionLabel: tui.NewLabel("❤️ : --"),
+		timeLabel:      tui.NewLabel("🕒: --"),
 	}
 
 	roomInfo := tui.NewVBox(
@@ -39,6 +41,7 @@ func layoutSidebar(roomInfoChan chan getter.RoomInfo) (tui.Widget, *tui.Box, Roo
 		tui.NewLabel(""),
 		labels.onlineLabel,
 		labels.attentionLabel,
+		labels.timeLabel,
 		tui.NewSpacer(),
 	)
 	roomInfo.SetBorder(true)
@@ -100,6 +103,7 @@ func roomInfoHandler(ui tui.UI, rankUsersBox *tui.Box, roomInfoLabels RoomInfoLa
 		roomInfoLabels.areaLabel.SetText(fmt.Sprintf("%s/%s", roomInfo.ParentAreaName, roomInfo.AreaName))
 		roomInfoLabels.onlineLabel.SetText(fmt.Sprintf("👀: %d", roomInfo.Online))
 		roomInfoLabels.attentionLabel.SetText(fmt.Sprintf("❤️ : %d", roomInfo.Attention))
+		roomInfoLabels.timeLabel.SetText(fmt.Sprintf("🕒: %s", roomInfo.Time))
 		rankUsersBox.SetTitle(fmt.Sprintf("Rank(%d)", len(roomInfo.OnlineRankUsers)))
 
 		for rankUsers.Length() > 0 {

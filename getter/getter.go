@@ -32,6 +32,7 @@ type RoomInfo struct {
 	AreaName        string
 	Online          int64
 	Attention       int64
+	Time            string
 	OnlineRankUsers []OnlineRankUser
 }
 
@@ -188,6 +189,15 @@ func (d *DanmuClient) syncRoomInfo(roomInfoChan chan RoomInfo) {
 			roomInfo.ParentAreaName = gjson.Get(r1.Text(), "data.parent_area_name").String()
 			roomInfo.Online = gjson.Get(r1.Text(), "data.online").Int()
 			roomInfo.Attention = gjson.Get(r1.Text(), "data.attention").Int()
+			_time, _ := time.Parse("2006-01-02 03:04:05", gjson.Get(r1.Text(), "data.live_time").String())
+			days := int(time.Since(_time).Hours() / 24)
+			hours := int(time.Since(_time).Hours()+8) % 24
+			minutes := int(time.Since(_time).Minutes()) % 60
+			if days > 0 {
+				roomInfo.Time = fmt.Sprintf("%dd%dh%dm", days, hours, minutes)
+			} else {
+				roomInfo.Time = fmt.Sprintf("%dh%dm", hours, minutes)
+			}
 		}
 		if err2 == nil {
 			rawUsers := gjson.Get(r2.Text(), "data.OnlineRankItem").Array()
