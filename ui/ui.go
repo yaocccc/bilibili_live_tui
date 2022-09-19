@@ -82,6 +82,9 @@ func layoutChat(roomId int64, busChan chan getter.DanmuMsg) (chat *tui.Box, hist
 		go sender.SendMsg(roomId, e.Text(), busChan)
 
 		submitHistory = append(submitHistory, e.Text())
+		if len(submitHistory) > 10 {
+			submitHistory = submitHistory[1:]
+		}
 		submitHistoryIndex = len(submitHistory)
 
 		input.SetText("")
