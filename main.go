@@ -22,10 +22,17 @@ var auth bg.CookieAuth
 
 func init() {
 	configFile := ""
+	roomId := int64(0)
 	flag.StringVar(&configFile, "c", "config.toml", "usage for config")
+	flag.Int64Var(&roomId, "r", 0, "usage for room id")
 	flag.Parse()
+
 	if _, err := toml.DecodeFile(configFile, &config); err != nil {
 		fmt.Printf("Error decoding config.toml: %s\n", err)
+	}
+
+	if roomId != 0 {
+		config.RoomId = roomId
 	}
 
 	attrs := strings.Split(config.Cookie, ";")

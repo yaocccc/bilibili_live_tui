@@ -34,7 +34,6 @@ func layoutSidebar(roomInfoChan chan getter.RoomInfo) (tui.Widget, *tui.Box, Roo
 	}
 
 	roomInfo := tui.NewVBox(
-		tui.NewLabel(""),
 		labels.titleLabel,
 		labels.roomIdLabel,
 		labels.areaLabel,

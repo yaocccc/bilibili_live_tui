@@ -23,6 +23,10 @@
 
 go run main.go -c config.toml
 
+也可以从 参数定义 roomId 优先级高于config
+
+go run main.go -c config.toml -r 9527
+
 快捷键:
 
 1. <esc> 退出
