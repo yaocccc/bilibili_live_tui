@@ -40,6 +40,7 @@ type DanmuMsg struct {
 	Author  string
 	Content string
 	Type    string
+	Time    time.Time
 }
 
 type receivedInfo struct {
@@ -137,36 +138,31 @@ func (d *DanmuClient) receiveRawMsg(busChan chan DanmuMsg) {
 				m := DanmuMsg{}
 				switch js.Cmd {
 				case "COMBO_SEND":
-					m.Type = "COMBO_SEND"
 					m.Author = js.Data["uname"].(string)
 					m.Content = fmt.Sprintf("送给 %s %d 个 %s", js.Data["r_uname"].(string), int(js.Data["combo_num"].(float64)), js.Data["gift_name"].(string))
 				case "DANMU_MSG":
-					m.Type = "DANMU_MSG"
 					m.Author = js.Info[2].([]interface{})[1].(string)
 					m.Content = js.Info[1].(string)
 				case "GUARD_BUY":
-					m.Type = "GUARD_BUY"
 					m.Author = js.Data["username"].(string)
 					m.Content = fmt.Sprintf("购买了 %s", js.Data["giftName"].(string))
 				case "INTERACT_WORD":
-					m.Type = "INTERACT_WORD"
 					m.Author = js.Data["uname"].(string)
 					m.Content = "进入了房间"
 				case "SEND_GIFT":
-					m.Type = "SEND_GIFT"
 					m.Author = js.Data["uname"].(string)
 					m.Content = fmt.Sprintf("投喂了 %d 个 %s", int(js.Data["num"].(float64)), js.Data["giftName"].(string))
 				case "USER_TOAST_MSG":
-					m.Type = "USER_TOAST_MSG"
 					m.Author = "system"
 					m.Content = js.Data["toast_msg"].(string)
 				case "NOTICE_MSG":
-					m.Type = "NOTICE_MSG"
 					m.Author = "system"
 					m.Content = js.MsgSelf
 				default: // "LIVE" "ACTIVITY_BANNER_UPDATE_V2" "ONLINE_RANK_COUNT" "ONLINE_RANK_TOP3" "ONLINE_RANK_V2" "PANEL" "PREPARING" "WIDGET_BANNER" "LIVE_INTERACTIVE_GAME"
 					continue
 				}
+				m.Type = js.Cmd
+				m.Time = time.Now()
 				busChan <- m
 			}
 		}
@@ -228,9 +224,12 @@ func (d *DanmuClient) getHistory(busChan chan DanmuMsg) {
 
 	histories := gjson.Get(r.Text(), "data.room").Array()
 	for _, history := range histories {
+		t, _ := time.Parse("2006-01-02 15:04:05", history.Get("timeline").String())
 		danmu := DanmuMsg{
 			Author:  history.Get("nickname").String(),
 			Content: history.Get("text").String(),
+			Type:    "DANMU_MSG",
+			Time:    t,
 		}
 		busChan <- danmu
 	}
