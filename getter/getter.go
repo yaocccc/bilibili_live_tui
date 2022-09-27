@@ -175,7 +175,7 @@ func (d *DanmuClient) receiveRawMsg(busChan chan DanmuMsg) {
 
 func (d *DanmuClient) syncRoomInfo(roomInfoChan chan RoomInfo) {
 	for {
-		roomInfoApi := fmt.Sprintf("https://api.live.bilibili.com/room/v1/Room/get_info?room_id=%d", d.roomID)
+		roomInfoApi := fmt.Sprintf("https://api.live.bilibili.com/room/v1/room/get_info?room_id=%d", d.roomID)
 		onlineRankApi := fmt.Sprintf("https://api.live.bilibili.com/xlive/general-interface/v1/rank/getOnlineGoldRank?ruid=%s&roomId=%d&page=1&pageSize=50", d.auth.DedeUserID, d.roomID)
 
 		roomInfo := new(RoomInfo)
@@ -219,6 +219,23 @@ func (d *DanmuClient) syncRoomInfo(roomInfoChan chan RoomInfo) {
 	}
 }
 
+func (d *DanmuClient) getHistory(busChan chan DanmuMsg) {
+	historyApi := fmt.Sprintf("https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory?roomid=%d", d.roomID)
+	r, err := requests.Get(historyApi)
+	if err != nil {
+		return
+	}
+
+	histories := gjson.Get(r.Text(), "data.room").Array()
+	for _, history := range histories {
+		danmu := DanmuMsg{
+			Author:  history.Get("nickname").String(),
+			Content: history.Get("text").String(),
+		}
+		busChan <- danmu
+	}
+}
+
 func Run(roomID int64, auth bg.CookieAuth, busChan chan DanmuMsg, roomInfoChan chan RoomInfo) {
 	dc := DanmuClient{
 		roomID:        uint32(roomID),
@@ -230,4 +247,5 @@ func Run(roomID int64, auth bg.CookieAuth, busChan chan DanmuMsg, roomInfoChan c
 	go dc.heartBeat()
 	go dc.receiveRawMsg(busChan)
 	go dc.syncRoomInfo(roomInfoChan)
+	go dc.getHistory(busChan)
 }
