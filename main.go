@@ -15,6 +15,7 @@ import (
 type Config struct {
 	Cookie string
 	RoomId int64
+	Theme  int64
 }
 
 var config Config
@@ -23,8 +24,10 @@ var auth bg.CookieAuth
 func init() {
 	configFile := ""
 	roomId := int64(0)
+	theme := int64(0)
 	flag.StringVar(&configFile, "c", "config.toml", "usage for config")
 	flag.Int64Var(&roomId, "r", 0, "usage for room id")
+	flag.Int64Var(&theme, "t", 0, "usage for theme")
 	flag.Parse()
 
 	if _, err := toml.DecodeFile(configFile, &config); err != nil {
@@ -33,6 +36,9 @@ func init() {
 
 	if roomId != 0 {
 		config.RoomId = roomId
+	}
+	if theme != 0 {
+		config.Theme = theme
 	}
 
 	attrs := strings.Split(config.Cookie, ";")
@@ -54,5 +60,5 @@ func main() {
 	roomInfoChan := make(chan getter.RoomInfo, 100)
 	getter.Run(config.RoomId, auth, busChan, roomInfoChan)
 	sender.Run(auth)
-	ui.Run(config.RoomId, busChan, roomInfoChan)
+	ui.Run(config.RoomId, config.Theme, busChan, roomInfoChan)
 }

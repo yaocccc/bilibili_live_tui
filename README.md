@@ -1,8 +1,14 @@
 # bilibili 直播间 TUI
 
-![show](show.gif)
-
 [关联的bilibili介绍视频](https://www.bilibili.com/video/bv1gG411G7XG)
+
+风格1: 聊天室风格
+
+![t1](./theme1.png)
+
+风格2: 极简风格
+
+![t2](./theme2.png)
 
 项目文件:
 
@@ -17,6 +23,7 @@
 ```plaintext
   Cookie: cookie信息 从web端找一个请求头复制cookie
   RoomId: 指定直播间roomId
+  Theme: 1 or 2 // 定义主题，1 聊天室风格，2 极简风格
 ```
 
 使用:
@@ -24,10 +31,10 @@
 export LANG="en_US.utf-8"  
 go run main.go -c config.toml
 
-也可以从 参数定义 roomId 优先级高于config
+也可以从 参数定义 roomId, theme 优先级高于config
 
 export LANG="en_US.utf-8"  
-go run main.go -c config.toml -r 9527
+go run main.go -c config.toml -r 9527 -t 1
 
 快捷键:
 

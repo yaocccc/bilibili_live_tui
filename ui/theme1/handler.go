@@ -1,4 +1,4 @@
-package ui
+package theme1
 
 import (
 	"bili/getter"
