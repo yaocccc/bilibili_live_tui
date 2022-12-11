@@ -28,7 +28,6 @@
 
 使用:
 
-export LANG="en_US.utf-8"  
 go run main.go -c config.toml
 
 也可以从 参数定义 roomId, theme 优先级高于config
