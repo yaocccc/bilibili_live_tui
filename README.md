@@ -23,16 +23,15 @@
 ```plaintext
   Cookie: cookie信息 从web端找一个请求头复制cookie
   RoomId: 指定直播间roomId
-  Theme: 1 or 2 // 定义主题，1 聊天室风格，2 极简风格
+  Theme: 1 // 定义主题，1 聊天室风格，2 极简风格
 ```
 
 使用:
 
 go run main.go -c config.toml
 
-也可以从 参数定义 roomId, theme 优先级高于config
+也可以从 参数定义 roomId, theme 优先级高于config(-r roomId, -t theme)
 
-export LANG="en_US.utf-8"  
 go run main.go -c config.toml -r 9527 -t 1
 
 快捷键:
