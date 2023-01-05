@@ -73,11 +73,27 @@ type handShakeInfo struct {
 }
 
 func (d *DanmuClient) connect() {
+	var (
+		r     *requests.Response
+		err   error
+		jm    []byte
+		retry = 0
+	)
+
 	var getDanmuInfo = "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=%d&type=0"
-	r, err := requests.Get(fmt.Sprintf(getDanmuInfo, d.roomID))
-	if err != nil {
-		fmt.Println("request.Get DanmuInfo: ", err)
+
+	for retry < 3 {
+		r, err = requests.Get(fmt.Sprintf(getDanmuInfo, d.roomID))
+		if err != nil {
+			fmt.Println("request.Get DanmuInfo: ", err)
+			retry++
+			time.Sleep(1 * time.Second)
+		} else {
+			retry = 0
+			break
+		}
 	}
+
 	fmt.Println("获取弹幕服务器")
 	token := gjson.Get(r.Text(), "data.token").String()
 	hostList := []string{}
@@ -94,27 +110,44 @@ func (d *DanmuClient) connect() {
 		Type:      2,
 		Key:       token,
 	}
-	for _, h := range hostList {
-		d.conn, _, err = websocket.DefaultDialer.Dial(fmt.Sprintf("wss://%s:443/sub", h), nil)
-		if err != nil {
-			fmt.Println("websocket.Dial: ", err)
-			continue
+	for retry < 3 {
+		for _, h := range hostList {
+			d.conn, _, err = websocket.DefaultDialer.Dial(fmt.Sprintf("wss://%s:443/sub", h), nil)
+			if err != nil {
+				fmt.Println("websocket.Dial: ", err)
+				continue
+			}
+			fmt.Printf("连接弹幕服务器[%s]成功\n", hostList[0])
+			break
 		}
-		fmt.Printf("连接弹幕服务器[%s]成功\n", hostList[0])
-		break
+		if err != nil {
+			retry++
+			fmt.Println("websocket.Dial Error")
+			time.Sleep(1 * time.Second)
+		}
+		jm, err = json.Marshal(hsInfo)
+		if err != nil {
+			retry++
+			fmt.Println("json.Marshal: ", err)
+			time.Sleep(1 * time.Second)
+		} else {
+			retry = 0
+			break
+		}
+
 	}
-	if err != nil {
-		fmt.Println("websocket.Dial Error")
+
+	for retry < 3 {
+		err = d.sendPackage(0, 16, 1, 7, 1, jm)
+		if err != nil {
+			retry++
+			fmt.Println("Conn SendPackage: ", err)
+			time.Sleep(1 * time.Second)
+		} else {
+			fmt.Printf("连接房间[%d]成功\n", d.roomID)
+			break
+		}
 	}
-	jm, err := json.Marshal(hsInfo)
-	if err != nil {
-		fmt.Println("json.Marshal: ", err)
-	}
-	err = d.sendPackage(0, 16, 1, 7, 1, jm)
-	if err != nil {
-		fmt.Println("Conn SendPackage: ", err)
-	}
-	fmt.Printf("连接房间[%d]成功\n", d.roomID)
 }
 
 func (d *DanmuClient) heartBeat() {
@@ -129,8 +162,8 @@ func (d *DanmuClient) heartBeat() {
 }
 func (d *DanmuClient) receiveRawMsg(busChan chan DanmuMsg) {
 	for {
-		_, rawMsg, _ := d.conn.ReadMessage()
-		if rawMsg[7] == 2 {
+		_, rawMsg, err := d.conn.ReadMessage()
+		if err != nil && len(rawMsg) >= 8 && rawMsg[7] == 2 {
 			msgs := splitMsg(zlibUnCompress(rawMsg[16:]))
 			for _, msg := range msgs {
 				uz := msg[16:]

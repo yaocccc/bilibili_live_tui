@@ -40,13 +40,15 @@ func SendMsg(roomId int64, msg string, busChan chan getter.DanmuMsg) {
 }
 
 func Run() {
-	bc, err = bg.NewBiliClient(&bg.BiliSetting{
-		Auth:      &config.Auth,
-		DebugMode: false,
-	})
-	if err != nil {
-		fmt.Printf("failed to make new bili client; error: %v", err)
-		os.Exit(0)
+	for retry := 0; retry < 3; retry++ {
+		bc, err = bg.NewBiliClient(&bg.BiliSetting{
+			Auth:      &config.Auth,
+			DebugMode: false,
+		})
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second * 1)
 	}
 	go heartbeat()
 }
