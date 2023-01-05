@@ -2,6 +2,10 @@
 
 [关联的bilibili介绍视频](https://www.bilibili.com/video/bv1gG411G7XG)
 
+使用方法 直接下载 releases 中的 bin文件即可
+
+---
+
 风格1: chatroom
 
 ![t1](./theme1.png)
