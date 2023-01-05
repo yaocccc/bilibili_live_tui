@@ -40,6 +40,15 @@ func Init() {
 	if theme != 0 {
 		Config.Theme = theme
 	}
+	if Config.TimeColor == "" {
+		Config.TimeColor = "#bbbbbb"
+	}
+	if Config.NameColor == "" {
+		Config.NameColor = "#bbbbbb"
+	}
+	if Config.ContentColor == "" {
+		Config.ContentColor = "#bbbbbb"
+	}
 
 	attrs := strings.Split(Config.Cookie, ";")
 	kvs := make(map[string]string)
