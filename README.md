@@ -2,13 +2,17 @@
 
 [关联的bilibili介绍视频](https://www.bilibili.com/video/bv1gG411G7XG)
 
-风格1: 聊天室风格
+风格1: chatroom
 
 ![t1](./theme1.png)
 
-风格2: 极简风格
+风格2: pure
 
 ![t2](./theme2.png)
+
+风格3: simple
+
+![t3](./theme3.png)
 
 项目文件:
 
@@ -23,7 +27,7 @@
 ```plaintext
   Cookie = "cookie信息 从web端找一个请求头复制cookie"
   RoomId = 指定直播间roomId
-  Theme = 1 // 定义主题，1 聊天室风格，2 极简风格
+  Theme = 1
   TimeColor = "#FFFFFF"
   NameColor = "#FFFFFF"
   ContentColor = "#FFFFFF"
@@ -39,7 +43,7 @@ go run main.go -c config.toml -r 9527 -t 1
 
 快捷键:
 
-1. <esc> 退出
+1. \<esc> 退出
 2. <ctrl+c> 退出
 3. <ctrl+u> 清空输入内容
 4. <up> 上一个输入记录
