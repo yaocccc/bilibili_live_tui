@@ -4,6 +4,7 @@ import (
 	"bili/config"
 	"encoding/json"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -110,6 +111,7 @@ func (d *DanmuClient) connect() {
 		Type:      2,
 		Key:       token,
 	}
+
 	for retry < 3 {
 		for _, h := range hostList {
 			d.conn, _, err = websocket.DefaultDialer.Dial(fmt.Sprintf("wss://%s:443/sub", h), nil)
@@ -134,7 +136,6 @@ func (d *DanmuClient) connect() {
 			retry = 0
 			break
 		}
-
 	}
 
 	for retry < 3 {
@@ -147,6 +148,11 @@ func (d *DanmuClient) connect() {
 			fmt.Printf("连接房间[%d]成功\n", d.roomID)
 			break
 		}
+	}
+
+	fmt.Println(retry)
+	if retry == 3 {
+		os.Exit(0)
 	}
 }
 
@@ -162,8 +168,8 @@ func (d *DanmuClient) heartBeat() {
 }
 func (d *DanmuClient) receiveRawMsg(busChan chan DanmuMsg) {
 	for {
-		_, rawMsg, err := d.conn.ReadMessage()
-		if err != nil && len(rawMsg) >= 8 && rawMsg[7] == 2 {
+		_, rawMsg, _ := d.conn.ReadMessage()
+		if len(rawMsg) >= 8 && rawMsg[7] == 2 {
 			msgs := splitMsg(zlibUnCompress(rawMsg[16:]))
 			for _, msg := range msgs {
 				uz := msg[16:]

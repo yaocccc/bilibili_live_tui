@@ -17,16 +17,16 @@ var submitHistoryIndex = 0
 func draw(app *tview.Application, roomId int64, busChan chan getter.DanmuMsg, roomInfoChan chan getter.RoomInfo) *tview.Grid {
 	grid := tview.NewGrid().SetRows(1, 1, 0, 1, 1).SetBorders(false)
 
-	roomInfoView := tview.NewTextView()
+	roomInfoView := tview.NewTextView().SetDynamicColors(true)
 	roomInfoView.SetBackgroundColor(tcell.ColorDefault)
 
-	delimiter1 := tview.NewTextView() // 分隔符
-	delimiter2 := tview.NewTextView() // 分隔符
+	delimiter1 := tview.NewTextView().SetDynamicColors(true) // 分隔符
+	delimiter2 := tview.NewTextView().SetDynamicColors(true) // 分隔符
 	delimiter1.SetBorder(false).SetBackgroundColor(tcell.ColorDefault)
 	delimiter2.SetBorder(false).SetBackgroundColor(tcell.ColorDefault)
 
 	_, _, width, _ := grid.GetRect()
-	str := ""
+	str := "[" + config.Config.FrameColor + "]"
 	for i := 0; i < width; i++ {
 		str = str + "—"
 	}
@@ -64,7 +64,7 @@ func draw(app *tview.Application, roomId int64, busChan chan getter.DanmuMsg, ro
 	})
 
 	grid.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
-		str := ""
+		str := "[" + config.Config.FrameColor + "]"
 		for i := 0; i < width; i++ {
 			str = str + "—"
 		}

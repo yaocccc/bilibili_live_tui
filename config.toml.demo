@@ -4,3 +4,6 @@ Theme = 1
 TimeColor = "#FFFFFF"
 NameColor = "#FFFFFF"
 ContentColor = "#FFFFFF"
+FrameColor = "#FFFFFF"
+InfoColor = "#FFFFFF"
+RankColor = "#FFFFFF"

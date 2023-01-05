@@ -19,14 +19,16 @@ func setBoxAttr(box *tview.Box, title string) {
 	box.SetTitleAlign(tview.AlignLeft)
 	box.SetTitle(title)
 	box.SetBackgroundColor(tcell.ColorDefault)
+	box.SetBorderColor(tcell.GetColor(config.Config.FrameColor))
+	box.SetTitleColor(tcell.GetColor(config.Config.FrameColor))
 }
 
 func drawSlidebar() (*tview.Grid, *tview.TextView, *tview.TextView) {
 	slidebarGrid := tview.NewGrid().SetRows(0, 0).SetBorders(false)
-	roomInfoView := tview.NewTextView()
+	roomInfoView := tview.NewTextView().SetDynamicColors(true)
 	setBoxAttr(roomInfoView.Box, "RoomInfo")
 
-	rankUsersView := tview.NewTextView()
+	rankUsersView := tview.NewTextView().SetDynamicColors(true)
 	setBoxAttr(rankUsersView.Box, "RankUsers")
 
 	slidebarGrid.

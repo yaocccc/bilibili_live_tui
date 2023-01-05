@@ -12,7 +12,7 @@ import (
 func roomInfoHandler(app *tview.Application, roomInfoView *tview.TextView, roomInfoChan chan getter.RoomInfo) {
 	for roomInfo := range roomInfoChan {
 		roomInfoView.SetText(
-			fmt.Sprintf(" %d/%s %s/%s 👀: %d ❤️: %d 🕒: %s", roomInfo.RoomId, roomInfo.Title, roomInfo.ParentAreaName, roomInfo.AreaName, roomInfo.Online, roomInfo.Attention, roomInfo.Time),
+			fmt.Sprintf("[%s] %d/%s %s/%s 👀: %d ❤️: %d 🕒: %s", config.Config.InfoColor, roomInfo.RoomId, roomInfo.Title, roomInfo.ParentAreaName, roomInfo.AreaName, roomInfo.Online, roomInfo.Attention, roomInfo.Time),
 		)
 		roomInfoView.ScrollToBeginning()
 		app.Draw()

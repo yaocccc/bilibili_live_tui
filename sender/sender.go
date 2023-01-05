@@ -40,7 +40,8 @@ func SendMsg(roomId int64, msg string, busChan chan getter.DanmuMsg) {
 }
 
 func Run() {
-	for retry := 0; retry < 3; retry++ {
+	retry := 0
+	for ; retry < 3; retry++ {
 		bc, err = bg.NewBiliClient(&bg.BiliSetting{
 			Auth:      &config.Auth,
 			DebugMode: false,
@@ -49,6 +50,9 @@ func Run() {
 			break
 		}
 		time.Sleep(time.Second * 1)
+	}
+	if retry == 3 {
+		os.Exit(0)
 	}
 	go heartbeat()
 }

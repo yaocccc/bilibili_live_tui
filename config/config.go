@@ -10,12 +10,15 @@ import (
 )
 
 type ConfigType struct {
-	Cookie       string
-	RoomId       int64
-	Theme        int64
-	TimeColor    string
-	NameColor    string
-	ContentColor string
+	Cookie       string // 登录cookie
+	RoomId       int64  // 直播间id
+	Theme        int64  // 主题
+	TimeColor    string // 时间颜色
+	NameColor    string // 名字颜色
+	ContentColor string // 内容颜色
+	FrameColor   string // 边框颜色
+	InfoColor    string // 房间信息颜色
+	RankColor    string // 排行榜颜色
 }
 
 var Config ConfigType
@@ -48,6 +51,24 @@ func Init() {
 	}
 	if Config.ContentColor == "" {
 		Config.ContentColor = "#bbbbbb"
+	}
+	if Config.TimeColor == "" {
+		Config.TimeColor = "#bbbbbb"
+	}
+	if Config.NameColor == "" {
+		Config.NameColor = "#bbbbbb"
+	}
+	if Config.ContentColor == "" {
+		Config.ContentColor = "#bbbbbb"
+	}
+	if Config.InfoColor == "" {
+		Config.InfoColor = "#bbbbbb"
+	}
+	if Config.RankColor == "" {
+		Config.RankColor = "#bbbbbb"
+	}
+	if Config.FrameColor == "" {
+		Config.FrameColor = "#bbbbbb"
 	}
 
 	attrs := strings.Split(Config.Cookie, ";")

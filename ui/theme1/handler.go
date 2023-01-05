@@ -12,7 +12,8 @@ import (
 func roomInfoHandler(app *tview.Application, roomInfoView *tview.TextView, rankUsersView *tview.TextView, roomInfoChan chan getter.RoomInfo) {
 	for roomInfo := range roomInfoChan {
 		roomInfoView.SetText(
-			roomInfo.Title + "\n" +
+			"[" + config.Config.InfoColor + "]" +
+				roomInfo.Title + "\n" +
 				fmt.Sprintf("ID: %d", roomInfo.RoomId) + "\n" +
 				fmt.Sprintf("分区: %s/%s", roomInfo.ParentAreaName, roomInfo.AreaName) + "\n" +
 				fmt.Sprintf("👀: %d", roomInfo.Online) + "\n" +
@@ -24,6 +25,7 @@ func roomInfoHandler(app *tview.Application, roomInfoView *tview.TextView, rankU
 		rankUserStr := ""
 		spec := []string{"👑 ", "🥈 ", "🥉 "}
 		for idx, rankUser := range roomInfo.OnlineRankUsers {
+			rankUserStr += "[" + config.Config.RankColor + "]"
 			if idx < 3 {
 				rankUserStr += spec[idx] + rankUser.Name + "\n"
 			} else {
