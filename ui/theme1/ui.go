@@ -3,6 +3,7 @@
 package theme1
 
 import (
+	"bili/config"
 	"bili/getter"
 	"bili/sender"
 
@@ -37,7 +38,7 @@ func drawSlidebar() (*tview.Grid, *tview.TextView, *tview.TextView) {
 
 func drawChat() (*tview.Grid, *tview.InputField, *tview.TextView) {
 	chatGrid := tview.NewGrid().SetRows(0, 3).SetBorders(false)
-	messagesView := tview.NewTextView()
+	messagesView := tview.NewTextView().SetDynamicColors(true)
 	setBoxAttr(messagesView.Box, "Messages")
 
 	input := tview.NewInputField()
@@ -79,9 +80,9 @@ func draw(app *tview.Application, roomId int64, busChan chan getter.DanmuMsg, ro
 	return rootGrid
 }
 
-func Run(roomId int64, busChan chan getter.DanmuMsg, roomInfoChan chan getter.RoomInfo) {
+func Run(busChan chan getter.DanmuMsg, roomInfoChan chan getter.RoomInfo) {
 	app := tview.NewApplication()
-	if err := app.SetRoot(draw(app, roomId, busChan, roomInfoChan), true).EnableMouse(false).Run(); err != nil {
+	if err := app.SetRoot(draw(app, config.Config.RoomId, busChan, roomInfoChan), true).EnableMouse(false).Run(); err != nil {
 		panic(err)
 	}
 }

@@ -21,9 +21,12 @@
 配置文件: config.toml 仓库内不带 请自己 从 config.toml.demo 复制修改
 
 ```plaintext
-  Cookie: cookie信息 从web端找一个请求头复制cookie
-  RoomId: 指定直播间roomId
-  Theme: 1 // 定义主题，1 聊天室风格，2 极简风格
+  Cookie = "cookie信息 从web端找一个请求头复制cookie"
+  RoomId = 指定直播间roomId
+  Theme = 1 // 定义主题，1 聊天室风格，2 极简风格
+  TimeColor = "#FFFFFF"
+  NameColor = "#FFFFFF"
+  ContentColor = "#FFFFFF"
 ```
 
 使用:

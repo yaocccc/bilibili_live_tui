@@ -1,64 +1,20 @@
 package main
 
 import (
+	"bili/config"
 	"bili/getter"
 	"bili/sender"
 	"bili/ui"
-	"flag"
-	"fmt"
-	"strings"
-
-	"github.com/BurntSushi/toml"
-	bg "github.com/iyear/biligo"
 )
 
-type Config struct {
-	Cookie string
-	RoomId int64
-	Theme  int64
-}
-
-var config Config
-var auth bg.CookieAuth
-
 func init() {
-	configFile := ""
-	roomId := int64(0)
-	theme := int64(0)
-	flag.StringVar(&configFile, "c", "config.toml", "usage for config")
-	flag.Int64Var(&roomId, "r", 0, "usage for room id")
-	flag.Int64Var(&theme, "t", 0, "usage for theme")
-	flag.Parse()
-
-	if _, err := toml.DecodeFile(configFile, &config); err != nil {
-		fmt.Printf("Error decoding config.toml: %s\n", err)
-	}
-
-	if roomId != 0 {
-		config.RoomId = roomId
-	}
-	if theme != 0 {
-		config.Theme = theme
-	}
-
-	attrs := strings.Split(config.Cookie, ";")
-	kvs := make(map[string]string)
-	for _, attr := range attrs {
-		kv := strings.Split(attr, "=")
-		k := strings.Trim(kv[0], " ")
-		v := strings.Trim(kv[1], " ")
-		kvs[k] = v
-	}
-	auth.SESSDATA = kvs["SESSDATA"]
-	auth.DedeUserID = kvs["DedeUserID"]
-	auth.DedeUserIDCkMd5 = kvs["DedeUserID__ckMd5"]
-	auth.BiliJCT = kvs["bili_jct"]
+	config.Init()
 }
 
 func main() {
 	busChan := make(chan getter.DanmuMsg, 100)
 	roomInfoChan := make(chan getter.RoomInfo, 100)
-	getter.Run(config.RoomId, auth, busChan, roomInfoChan)
-	sender.Run(auth)
-	ui.Run(config.RoomId, config.Theme, busChan, roomInfoChan)
+	getter.Run(busChan, roomInfoChan)
+	sender.Run()
+	ui.Run(busChan, roomInfoChan)
 }

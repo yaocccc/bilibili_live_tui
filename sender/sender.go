@@ -1,6 +1,7 @@
 package sender
 
 import (
+	"bili/config"
 	"bili/getter"
 	"fmt"
 	"os"
@@ -38,9 +39,9 @@ func SendMsg(roomId int64, msg string, busChan chan getter.DanmuMsg) {
 	}
 }
 
-func Run(auth bg.CookieAuth) {
+func Run() {
 	bc, err = bg.NewBiliClient(&bg.BiliSetting{
-		Auth:      &auth,
+		Auth:      &config.Auth,
 		DebugMode: false,
 	})
 	if err != nil {

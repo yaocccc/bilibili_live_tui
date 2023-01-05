@@ -1,6 +1,7 @@
 package getter
 
 import (
+	"bili/config"
 	"encoding/json"
 	"fmt"
 	"time"
@@ -235,10 +236,10 @@ func (d *DanmuClient) getHistory(busChan chan DanmuMsg) {
 	}
 }
 
-func Run(roomID int64, auth bg.CookieAuth, busChan chan DanmuMsg, roomInfoChan chan RoomInfo) {
+func Run(busChan chan DanmuMsg, roomInfoChan chan RoomInfo) {
 	dc := DanmuClient{
-		roomID:        uint32(roomID),
-		auth:          auth,
+		roomID:        uint32(config.Config.RoomId),
+		auth:          config.Auth,
 		conn:          new(websocket.Conn),
 		unzlibChannel: make(chan []byte, 100),
 	}

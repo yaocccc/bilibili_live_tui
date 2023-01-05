@@ -1,6 +1,7 @@
 package theme1
 
 import (
+	"bili/config"
 	"bili/getter"
 	"fmt"
 	"strings"
@@ -50,7 +51,7 @@ func danmuHandler(app *tview.Application, messages *tview.TextView, busChan chan
 		viewStr := messages.GetText(false)
 		str := ""
 		if lastMsg.Type != msg.Type || lastMsg.Author != msg.Author || lastMsg.Time.Format("15:04") != msg.Time.Format("15:04") {
-			str += fmt.Sprintf("┌─ %s %s", msg.Time.Format("15:04"), msg.Author) + "\n"
+			str += fmt.Sprintf("┌─ [%s]%s [%s]%s[%s]", config.Config.TimeColor, msg.Time.Format("15:04"), config.Config.NameColor, msg.Author, config.Config.ContentColor) + "\n"
 			str += fmt.Sprintf("└─ %s", msg.Content) + "\n"
 		} else {
 			lines := strings.Split(viewStr, "\n")
