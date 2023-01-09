@@ -33,6 +33,7 @@
   RoomId = 指定直播间roomId
   Theme = 1                // 主题 1 2 3
   SingleLine = 1           // 是否开启单行
+  ShowTime = 1             // 是否显示时间
   TimeColor = "#BBBBBB"    // 时间颜色
   NameColor = "#BBBBBB"    // 名字颜色
   ContentColor = "#BBBBBB" // 内容颜色
@@ -49,10 +50,16 @@ go run main.go -c config.toml
 
 go run main.go -c config.toml -r 9527 -t 1
 
-快捷键:
+参数说明:  
+  1. `-c string:configfile`
+  2. `-r string:roomId`
+  3. `-t int:theme`
+  4. `-l int:singleline`
+  5. `-s int:showtime`
 
-1. \<esc> 退出
-2. <ctrl+c> 退出
-3. <ctrl+u> 清空输入内容
-4. <up> 上一个输入记录
-4. <down> 下一个输入记录
+快捷键:  
+  1. \<esc> 退出
+  2. <ctrl+c> 退出
+  3. <ctrl+u> 清空输入内容
+  4. <up> 上一个输入记录
+  5. <down> 下一个输入记录

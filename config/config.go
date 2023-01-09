@@ -14,6 +14,7 @@ type ConfigType struct {
 	RoomId       int64  // 直播间id
 	Theme        int64  // 主题
 	SingleLine   int64  // 是否开启单行
+	ShowTime     int64  // 是否显示时间
 	TimeColor    string // 时间颜色
 	NameColor    string // 名字颜色
 	ContentColor string // 内容颜色
@@ -27,27 +28,32 @@ var Auth bg.CookieAuth
 
 func Init() {
 	configFile := ""
-	roomId := int64(0)
-	theme := int64(0)
-	single_line := int64(0)
+	roomId := int64(-1)
+	theme := int64(-1)
+	single_line := int64(-1)
+	show_time := int64(-1)
 	flag.StringVar(&configFile, "c", "config.toml", "usage for config")
-	flag.Int64Var(&roomId, "r", 0, "usage for room id")
-	flag.Int64Var(&theme, "t", 0, "usage for theme")
-	flag.Int64Var(&single_line, "s", 0, "usage for single_line")
+	flag.Int64Var(&roomId, "r", -1, "usage for room id")
+	flag.Int64Var(&theme, "t", -1, "usage for theme")
+	flag.Int64Var(&single_line, "l", -1, "usage for single_line")
+	flag.Int64Var(&show_time, "s", -1, "usage for show_time")
 	flag.Parse()
 
 	if _, err := toml.DecodeFile(configFile, &Config); err != nil {
 		fmt.Printf("Error decoding config.toml: %s\n", err)
 	}
 
-	if roomId != 0 {
+	if roomId != -1 {
 		Config.RoomId = roomId
 	}
-	if theme != 0 {
+	if theme != -1 {
 		Config.Theme = theme
 	}
-	if single_line != 0 {
+	if single_line != -1 {
 		Config.SingleLine = single_line
+	}
+	if show_time != -1 {
+		Config.ShowTime = show_time
 	}
 	if Config.TimeColor == "" {
 		Config.TimeColor = "#bbbbbb"
