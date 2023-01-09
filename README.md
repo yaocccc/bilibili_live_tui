@@ -32,6 +32,7 @@
   Cookie = "cookie信息 从web端找一个请求头复制cookie"
   RoomId = 指定直播间roomId
   Theme = 1                // 主题 1 2 3
+  SingleLine = 1           // 是否开启单行
   TimeColor = "#BBBBBB"    // 时间颜色
   NameColor = "#BBBBBB"    // 名字颜色
   ContentColor = "#BBBBBB" // 内容颜色

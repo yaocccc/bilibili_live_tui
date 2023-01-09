@@ -13,6 +13,7 @@ type ConfigType struct {
 	Cookie       string // 登录cookie
 	RoomId       int64  // 直播间id
 	Theme        int64  // 主题
+	SingleLine   int64  // 是否开启单行
 	TimeColor    string // 时间颜色
 	NameColor    string // 名字颜色
 	ContentColor string // 内容颜色
@@ -28,9 +29,11 @@ func Init() {
 	configFile := ""
 	roomId := int64(0)
 	theme := int64(0)
+	single_line := int64(0)
 	flag.StringVar(&configFile, "c", "config.toml", "usage for config")
 	flag.Int64Var(&roomId, "r", 0, "usage for room id")
 	flag.Int64Var(&theme, "t", 0, "usage for theme")
+	flag.Int64Var(&single_line, "s", 0, "usage for single_line")
 	flag.Parse()
 
 	if _, err := toml.DecodeFile(configFile, &Config); err != nil {
@@ -42,6 +45,9 @@ func Init() {
 	}
 	if theme != 0 {
 		Config.Theme = theme
+	}
+	if single_line != 0 {
+		Config.SingleLine = single_line
 	}
 	if Config.TimeColor == "" {
 		Config.TimeColor = "#bbbbbb"
