@@ -29,6 +29,7 @@ type OnlineRankUser struct {
 
 type RoomInfo struct {
 	RoomId          int
+	Uid             int
 	Title           string
 	ParentAreaName  string
 	AreaName        string
@@ -212,14 +213,12 @@ func (d *DanmuClient) receiveRawMsg(busChan chan DanmuMsg) {
 func (d *DanmuClient) syncRoomInfo(roomInfoChan chan RoomInfo) {
 	for {
 		roomInfoApi := fmt.Sprintf("https://api.live.bilibili.com/room/v1/room/get_info?room_id=%d", d.roomID)
-		onlineRankApi := fmt.Sprintf("https://api.live.bilibili.com/xlive/general-interface/v1/rank/getOnlineGoldRank?ruid=%s&roomId=%d&page=1&pageSize=50", d.auth.DedeUserID, d.roomID)
-
 		roomInfo := new(RoomInfo)
 		roomInfo.OnlineRankUsers = make([]OnlineRankUser, 0)
 		r1, err1 := requests.Get(roomInfoApi)
-		r2, err2 := requests.Get(onlineRankApi)
 		if err1 == nil {
 			roomInfo.RoomId = int(d.roomID)
+			roomInfo.Uid = int(gjson.Get(r1.Text(), "data.uid").Int())
 			roomInfo.Title = gjson.Get(r1.Text(), "data.title").String()
 			roomInfo.AreaName = gjson.Get(r1.Text(), "data.area_name").String()
 			roomInfo.ParentAreaName = gjson.Get(r1.Text(), "data.parent_area_name").String()
@@ -238,6 +237,9 @@ func (d *DanmuClient) syncRoomInfo(roomInfoChan chan RoomInfo) {
 				roomInfo.Time = fmt.Sprintf("%d分", minutes)
 			}
 		}
+
+		onlineRankApi := fmt.Sprintf("https://api.live.bilibili.com/xlive/general-interface/v1/rank/getOnlineGoldRank?ruid=%d&roomId=%d&page=1&pageSize=50", roomInfo.Uid, d.roomID)
+		r2, err2 := requests.Get(onlineRankApi)
 		if err2 == nil {
 			rawUsers := gjson.Get(r2.Text(), "data.OnlineRankItem").Array()
 			for _, rawUser := range rawUsers {
