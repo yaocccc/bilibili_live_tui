@@ -18,6 +18,10 @@
 
 ![t3](./theme3.png)
 
+风格4: info
+
+![t4](./theme4.png)
+
 项目文件:
 
 ```plaintext

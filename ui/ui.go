@@ -6,6 +6,7 @@ import (
 	"bili/ui/theme1"
 	"bili/ui/theme2"
 	"bili/ui/theme3"
+	"bili/ui/theme4"
 	"os"
 	"os/exec"
 	"strings"
@@ -45,6 +46,8 @@ func Run(busChan chan getter.DanmuMsg, roomInfoChan chan getter.RoomInfo) {
 		theme2.Run(busChan, roomInfoChan) // pure
 	case 3: // theme3
 		theme3.Run(busChan, roomInfoChan) // simple
+	case 4:
+		theme4.Run(busChan, roomInfoChan) // info
 	default:
 		theme1.Run(busChan, roomInfoChan) // default theme1
 	}
