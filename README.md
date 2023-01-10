@@ -18,7 +18,7 @@
 
 ![t3](./theme3.png)
 
-风格4: info
+风格4: info (感谢@soft98-top添加的theme4)
 
 ![t4](./theme4.png)
 
@@ -67,3 +67,8 @@ go run main.go -c config.toml -r 9527 -t 1
   3. <ctrl+u> 清空输入内容
   4. <up> 上一个输入记录
   5. <down> 下一个输入记录
+
+## 贡献者
+
+yaoccccc  
+soft98-top [PR#3](https://github.com/yaocccc/bilibili_live_tui/pull/3)  
