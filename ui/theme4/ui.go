@@ -39,7 +39,7 @@ func drawSlidebar() (*tview.Grid, *tview.TextView, *tview.TextView) {
 }
 
 func drawChat() (*tview.Grid, *tview.InputField, *tview.TextView, *tview.TextView, *tview.TextView) {
-	chatGrid := tview.NewGrid().SetRows(0, 3).SetBorders(false)
+	chatGrid := tview.NewGrid().SetRows(0, 0, 3).SetBorders(false)
 	messagesView := tview.NewTextView().SetDynamicColors(true)
 	setBoxAttr(messagesView.Box, "Messages")
 	accessView := tview.NewTextView().SetDynamicColors(true)
@@ -51,11 +51,17 @@ func drawChat() (*tview.Grid, *tview.InputField, *tview.TextView, *tview.TextVie
 	input.SetFormAttributes(0, tcell.ColorDefault, tcell.ColorDefault, tcell.ColorDefault, tcell.ColorDefault)
 	setBoxAttr(input.Box, "Send")
 
+	// 动态布局 宽度大于80时 采用三列布局 否则采用两列布局
+	// 三列 | 消息 | 访问 | 礼物 |, 两列 | 消息 | 访问 / 礼物 |
 	chatGrid.
-		AddItem(messagesView, 0, 0, 1, 1, 0, 0, false).
-		AddItem(accessView, 0, 1, 1, 1, 0, 0, false).
-		AddItem(giftView, 0, 2, 1, 1, 0, 0, false).
-		AddItem(input, 1, 0, 1, 3, 0, 0, true)
+		AddItem(messagesView, 0, 0, 2, 1, 0, 0, false).  // 小于80时 | danmu | access / gift |
+		AddItem(messagesView, 0, 0, 2, 1, 0, 80, false). // 超过80时 | danmu | access | gift |
+		AddItem(accessView, 0, 1, 1, 1, 0, 0, false).    // 小于80时 | danmu | access / gift |
+		AddItem(accessView, 0, 1, 2, 1, 0, 80, false).   // 超过80时 | danmu | access | gift |
+		AddItem(giftView, 1, 1, 1, 1, 0, 0, false).      // 小于80时 | danmu | access / gift |
+		AddItem(giftView, 0, 2, 2, 1, 0, 80, false).     // 超过80时 | danmu | access | gift |
+		AddItem(input, 2, 0, 1, 2, 0, 0, true).          // 小于80时 | danmu | access / gift |
+		AddItem(input, 2, 0, 1, 3, 0, 80, true)          // 超过80时 | danmu | access | gift |
 
 	return chatGrid, input, messagesView, accessView, giftView
 }
