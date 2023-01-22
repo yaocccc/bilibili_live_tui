@@ -68,6 +68,10 @@ go run main.go -c config.toml -r 9527 -t 1
   4. <up> 上一个输入记录
   5. <down> 下一个输入记录
 
+## 类似项目
+
+[zaiic/bili-live-chat](https://github.com/zaiic/bili-live-chat): A bilibili streaming chat tool using TUI written in Rust. 
+
 ## 贡献者
 
 yaoccccc  
