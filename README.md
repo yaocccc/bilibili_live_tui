@@ -74,5 +74,8 @@ go run main.go -c config.toml -r 9527 -t 1
 
 ## 贡献者
 
-yaoccccc  
-soft98-top [PR#3](https://github.com/yaocccc/bilibili_live_tui/pull/3)  
+- [yaocccc](https://github.com/yaocccc)  
+- [soft98-top](https://github.com/soft98-top)
+  - [PR#3 增加theme4，修复直播间rank显示](https://github.com/yaocccc/bilibili_live_tui/pull/3)  
+- [zaiic](https://github.com/zaiic)
+  - [PR#4 更新README，添加类似项目](https://github.com/yaocccc/bilibili_live_tui/pull/4)
