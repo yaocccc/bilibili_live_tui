@@ -79,3 +79,15 @@ go run main.go -c config.toml -r 9527 -t 1
   - [PR#3 增加theme4，修复直播间rank显示](https://github.com/yaocccc/bilibili_live_tui/pull/3)  
 - [zaiic](https://github.com/zaiic)
   - [PR#4 更新README，添加类似项目](https://github.com/yaocccc/bilibili_live_tui/pull/4)
+
+## Support
+
+<a href="https://www.buymeacoffee.com/yaocccc" target="_blank">
+  <img src="https://github.com/yaocccc/yaocccc/raw/master/qr.png">
+</a>
+
+<br>
+
+<a href="https://www.buymeacoffee.com/yaocccc" target="_blank">
+  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 200px !important;" >
+</a>
