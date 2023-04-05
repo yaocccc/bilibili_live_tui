@@ -30,29 +30,17 @@
   ui     TUI的实现
 ```
 
-配置文件: config.toml 仓库内不带 请自己 从 config.toml.demo 复制修改
-
-```plaintext
-  Cookie = "cookie信息 从web端找一个请求头复制cookie"
-  RoomId = 指定直播间roomId
-  Theme = 1                // 主题 1 2 3
-  SingleLine = 1           // 是否开启单行
-  ShowTime = 1             // 是否显示时间
-  TimeColor = "#BBBBBB"    // 时间颜色
-  NameColor = "#BBBBBB"    // 名字颜色
-  ContentColor = "#BBBBBB" // 内容颜色
-  FrameColor = "#BBBBBB"   // 边框颜色
-  InfoColor = "#BBBBBB"    // 房间信息颜色
-  RankColor = "#BBBBBB"    // 排行榜颜色
-```
-
 使用:
 
-go run main.go -c config.toml
+go run main.go
 
 也可以从 参数定义 roomId, theme 优先级高于config(-r roomId, -t theme)
 
 go run main.go -c config.toml -r 9527 -t 1
+
+配置:
+
+默认配置文件: ~/.config/bili/config.toml
 
 参数说明:  
   1. `-c string:configfile`
@@ -79,15 +67,11 @@ go run main.go -c config.toml -r 9527 -t 1
   - [PR#3 增加theme4，修复直播间rank显示](https://github.com/yaocccc/bilibili_live_tui/pull/3)  
 - [zaiic](https://github.com/zaiic)
   - [PR#4 更新README，添加类似项目](https://github.com/yaocccc/bilibili_live_tui/pull/4)
+- [Ruixi-rebirth](https://github.com/Ruixi-rebirth)
+  - [PR#6 自动创建配置文件到 $HOME/.config/bili/config.toml](https://github.com/yaocccc/bilibili_live_tui/pull/6)
 
-## Support
+## Support: buy me a coffee)
 
 <a href="https://www.buymeacoffee.com/yaocccc" target="_blank">
   <img src="https://github.com/yaocccc/yaocccc/raw/master/qr.png">
-</a>
-
-<br>
-
-<a href="https://www.buymeacoffee.com/yaocccc" target="_blank">
-  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-violet.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 200px !important;" >
 </a>

@@ -28,19 +28,20 @@ type ConfigType struct {
 var Auth bg.CookieAuth
 var Config ConfigType
 
-func Init() {
+func defaultCfgFile() (configFile string, err error) {
 	currentUser, err := user.Current()
 	if err != nil {
-		panic(err)
+		return
 	}
 	homeDir := currentUser.HomeDir
 	path := homeDir + "/.config/bili"
 	if err = os.MkdirAll(path, 0755); err != nil {
-		panic(err)
+		return
 	}
-	configFile := path + "/config.toml"
+	configFile = path + "/config.toml"
 	_, err = os.Stat(configFile)
 	if os.IsNotExist(err) {
+		var f *os.File
 		config := ConfigType{
 			Cookie:       "从你BILIBILI的请求里抓一个Cookie",
 			RoomId:       23333333,
@@ -54,31 +55,48 @@ func Init() {
 			InfoColor:    "#FFFFFF",
 			RankColor:    "#FFFFFF",
 		}
-		f, err := os.Create(configFile)
+		f, err = os.Create(configFile)
 		if err != nil {
-			panic(err)
+			return
 		}
 		defer f.Close()
-		if err := toml.NewEncoder(f).Encode(config); err != nil {
-			panic(err)
+		if err = toml.NewEncoder(f).Encode(config); err != nil {
+			return
 		}
-	} else if err != nil {
-		panic(err)
+
+		panic("配置文件已生成，请修改配置文件后再次运行，配置文件路径为：" + configFile)
 	}
 
-	if _, err := toml.DecodeFile(configFile, &Config); err != nil {
-		fmt.Printf("Error decoding config.toml: %s\n", err)
-	}
+	return
+}
+
+func Init() {
+	var err error
+	configFile := ""
 	roomId := int64(-1)
 	theme := int64(-1)
 	single_line := int64(-1)
 	show_time := int64(-1)
-	flag.StringVar(&configFile, "c", "config.toml", "usage for config")
+	flag.StringVar(&configFile, "c", "", "usage for config")
 	flag.Int64Var(&roomId, "r", -1, "usage for room id")
 	flag.Int64Var(&theme, "t", -1, "usage for theme")
 	flag.Int64Var(&single_line, "l", -1, "usage for single_line")
 	flag.Int64Var(&show_time, "s", -1, "usage for show_time")
 	flag.Parse()
+
+	if configFile == "" {
+		configFile, err = defaultCfgFile()
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	if _, err := toml.DecodeFile(configFile, &Config); err != nil {
+		fmt.Printf("Error decoding config.toml: %s\n", err)
+	}
+	if Config.Cookie == "从你BILIBILI的请求里抓一个Cookie" {
+		panic("请检查配置文件是否正确: " + configFile)
+	}
 
 	if roomId != -1 {
 		Config.RoomId = roomId

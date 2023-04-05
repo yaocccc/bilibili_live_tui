@@ -151,7 +151,7 @@ func (d *DanmuClient) connect() {
 		}
 	}
 
-	fmt.Println(retry)
+	fmt.Println("尝试链接bilibili次数: ", retry+1)
 	if retry == 3 {
 		os.Exit(0)
 	}
