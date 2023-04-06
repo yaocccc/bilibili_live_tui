@@ -1,15 +1,28 @@
 module bili
 
-go 1.15
+go 1.20
 
 require (
-	github.com/BurntSushi/toml v1.1.0
-	github.com/asmcos/requests v0.0.0-20200816142649-95abc76c8cac
-	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/gdamore/tcell/v2 v2.5.3
-	github.com/gorilla/websocket v1.4.2
-	github.com/iyear/biligo v0.1.5
-	github.com/rivo/tview v0.0.0-20220916081518-2e69b7385a37
-	github.com/tidwall/gjson v1.14.3
-	google.golang.org/protobuf v1.28.1 // indirect
+	github.com/BurntSushi/toml v1.2.1
+	github.com/asmcos/requests v0.0.0-20210319030608-c839e8ae4946
+	github.com/gdamore/tcell/v2 v2.6.0
+	github.com/gorilla/websocket v1.5.0
+	github.com/iyear/biligo v0.1.6
+	github.com/rivo/tview v0.0.0-20230330183452-5796b0cd5c1f
+	github.com/tidwall/gjson v1.14.4
+)
+
+require (
+	github.com/gdamore/encoding v1.0.0 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
+	github.com/mattn/go-runewidth v0.0.14 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/rivo/uniseg v0.4.4 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.1 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/term v0.7.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
+	google.golang.org/protobuf v1.30.0 // indirect
 )
