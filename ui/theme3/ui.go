@@ -1,4 +1,4 @@
-// 聊天室主题
+// simple
 
 package theme3
 
@@ -15,25 +15,19 @@ var submitHistory = []string{}
 var submitHistoryIndex = 0
 var bg = tcell.ColorDefault
 
-func init() {
-	if config.Config.BGColor != "NONE" {
-		bg = tcell.GetColor(config.Config.BGColor)
-	}
-}
-
 func draw(app *tview.Application, roomId int64, busChan chan getter.DanmuMsg, roomInfoChan chan getter.RoomInfo) *tview.Grid {
 	grid := tview.NewGrid().SetRows(1, 1, 0, 1, 1).SetBorders(false)
 
 	roomInfoView := tview.NewTextView().SetDynamicColors(true)
 	roomInfoView.SetBackgroundColor(bg)
 
-	delimiter1 := tview.NewTextView().SetDynamicColors(true) // 分隔符
-	delimiter2 := tview.NewTextView().SetDynamicColors(true) // 分隔符
-	delimiter1.SetBorder(false).SetBackgroundColor(bg)
-	delimiter2.SetBorder(false).SetBackgroundColor(bg)
+	delimiter1 := tview.NewTextView().SetTextColor(tcell.GetColor(config.Config.FrameColor))
+	delimiter2 := tview.NewTextView().SetTextColor(tcell.GetColor(config.Config.FrameColor))
+	delimiter1.SetBackgroundColor(bg).SetBorder(false)
+	delimiter2.SetBackgroundColor(bg).SetBorder(false)
 
 	_, _, width, _ := grid.GetRect()
-	str := "[" + config.Config.FrameColor + "]"
+	str := ""
 	for i := 0; i < width; i++ {
 		str = str + "—"
 	}
@@ -71,7 +65,7 @@ func draw(app *tview.Application, roomId int64, busChan chan getter.DanmuMsg, ro
 	})
 
 	grid.SetDrawFunc(func(screen tcell.Screen, x, y, width, height int) (int, int, int, int) {
-		str := "[" + config.Config.FrameColor + "]"
+		str := ""
 		for i := 0; i < width; i++ {
 			str = str + "—"
 		}
@@ -84,6 +78,9 @@ func draw(app *tview.Application, roomId int64, busChan chan getter.DanmuMsg, ro
 }
 
 func Run(busChan chan getter.DanmuMsg, roomInfoChan chan getter.RoomInfo) {
+	if config.Config.Background != "NONE" {
+		bg = tcell.GetColor(config.Config.Background)
+	}
 	app := tview.NewApplication()
 	if err := app.SetRoot(draw(app, config.Config.RoomId, busChan, roomInfoChan), true).EnableMouse(false).Run(); err != nil {
 		panic(err)

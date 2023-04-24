@@ -15,12 +15,6 @@ var submitHistory = []string{}
 var submitHistoryIndex = 0
 var bg = tcell.ColorDefault
 
-func init() {
-	if config.Config.BGColor != "NONE" {
-		bg = tcell.GetColor(config.Config.BGColor)
-	}
-}
-
 func setBoxAttr(box *tview.Box, title string) {
 	box.SetBorder(true)
 	box.SetTitleAlign(tview.AlignLeft)
@@ -33,9 +27,11 @@ func setBoxAttr(box *tview.Box, title string) {
 func drawSlidebar() (*tview.Grid, *tview.TextView, *tview.TextView) {
 	slidebarGrid := tview.NewGrid().SetRows(0, 0).SetBorders(false)
 	roomInfoView := tview.NewTextView().SetDynamicColors(true)
+	roomInfoView.SetBackgroundColor(bg)
 	setBoxAttr(roomInfoView.Box, "RoomInfo")
 
 	rankUsersView := tview.NewTextView().SetDynamicColors(true)
+	rankUsersView.SetBackgroundColor(bg)
 	setBoxAttr(rankUsersView.Box, "RankUsers")
 
 	slidebarGrid.
@@ -48,10 +44,13 @@ func drawSlidebar() (*tview.Grid, *tview.TextView, *tview.TextView) {
 func drawChat() (*tview.Grid, *tview.InputField, *tview.TextView, *tview.TextView, *tview.TextView) {
 	chatGrid := tview.NewGrid().SetRows(0, 0, 3).SetBorders(false)
 	messagesView := tview.NewTextView().SetDynamicColors(true)
+	messagesView.SetBackgroundColor(bg)
 	setBoxAttr(messagesView.Box, "Messages")
 	accessView := tview.NewTextView().SetDynamicColors(true)
+	accessView.SetBackgroundColor(bg)
 	setBoxAttr(accessView.Box, "Access")
 	giftView := tview.NewTextView().SetDynamicColors(true)
+	giftView.SetBackgroundColor(bg)
 	setBoxAttr(giftView.Box, "Gift")
 
 	input := tview.NewInputField()
@@ -102,6 +101,9 @@ func draw(app *tview.Application, roomId int64, busChan chan getter.DanmuMsg, ro
 }
 
 func Run(busChan chan getter.DanmuMsg, roomInfoChan chan getter.RoomInfo) {
+	if config.Config.Background != "NONE" {
+		bg = tcell.GetColor(config.Config.Background)
+	}
 	app := tview.NewApplication()
 	if err := app.SetRoot(draw(app, config.Config.RoomId, busChan, roomInfoChan), true).EnableMouse(false).Run(); err != nil {
 		panic(err)

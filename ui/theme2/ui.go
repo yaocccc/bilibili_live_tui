@@ -15,12 +15,6 @@ var submitHistory = []string{}
 var submitHistoryIndex = 0
 var bg = tcell.ColorDefault
 
-func init() {
-	if config.Config.BGColor != "NONE" {
-		bg = tcell.GetColor(config.Config.BGColor)
-	}
-}
-
 func draw(app *tview.Application, roomId int64, busChan chan getter.DanmuMsg, roomInfoChan chan getter.RoomInfo) *tview.Grid {
 	chatGrid := tview.NewGrid().SetRows(0, 1).SetBorders(false)
 	messagesView := tview.NewTextView().SetDynamicColors(true)
@@ -53,6 +47,9 @@ func draw(app *tview.Application, roomId int64, busChan chan getter.DanmuMsg, ro
 }
 
 func Run(busChan chan getter.DanmuMsg, roomInfoChan chan getter.RoomInfo) {
+	if config.Config.Background != "NONE" {
+		bg = tcell.GetColor(config.Config.Background)
+	}
 	app := tview.NewApplication()
 	if err := app.SetRoot(draw(app, config.Config.RoomId, busChan, roomInfoChan), true).EnableMouse(false).Run(); err != nil {
 		panic(err)
