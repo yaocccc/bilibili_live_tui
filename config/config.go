@@ -23,6 +23,7 @@ type ConfigType struct {
 	FrameColor   string // 边框颜色
 	InfoColor    string // 房间信息颜色
 	RankColor    string // 排行榜颜色
+	BGColor      string // 背景颜色
 }
 
 var Auth bg.CookieAuth
@@ -54,6 +55,7 @@ func defaultCfgFile() (configFile string, err error) {
 			FrameColor:   "#FFFFFF",
 			InfoColor:    "#FFFFFF",
 			RankColor:    "#FFFFFF",
+			BGColor:      "NONE", // 默认无背景颜色 NONE表示无背景颜色
 		}
 		f, err = os.Create(configFile)
 		if err != nil {
@@ -136,6 +138,9 @@ func Init() {
 	}
 	if Config.FrameColor == "" {
 		Config.FrameColor = "#bbbbbb"
+	}
+	if Config.BGColor == "" {
+		Config.BGColor = "NONE"
 	}
 
 	attrs := strings.Split(Config.Cookie, ";")

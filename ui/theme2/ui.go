@@ -13,14 +13,21 @@ import (
 
 var submitHistory = []string{}
 var submitHistoryIndex = 0
+var bg = tcell.ColorDefault
+
+func init() {
+	if config.Config.BGColor != "NONE" {
+		bg = tcell.GetColor(config.Config.BGColor)
+	}
+}
 
 func draw(app *tview.Application, roomId int64, busChan chan getter.DanmuMsg, roomInfoChan chan getter.RoomInfo) *tview.Grid {
 	chatGrid := tview.NewGrid().SetRows(0, 1).SetBorders(false)
 	messagesView := tview.NewTextView().SetDynamicColors(true)
-	messagesView.SetBackgroundColor(tcell.ColorDefault)
+	messagesView.SetBackgroundColor(bg)
 
 	input := tview.NewInputField()
-	input.SetFormAttributes(0, tcell.ColorDefault, tcell.ColorDefault, tcell.ColorDefault, tcell.ColorDefault)
+	input.SetFormAttributes(0, tcell.ColorDefault, bg, tcell.ColorDefault, bg)
 
 	chatGrid.
 		AddItem(messagesView, 0, 0, 1, 1, 0, 0, false).

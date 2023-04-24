@@ -13,12 +13,19 @@ import (
 
 var submitHistory = []string{}
 var submitHistoryIndex = 0
+var bg = tcell.ColorDefault
+
+func init() {
+	if config.Config.BGColor != "NONE" {
+		bg = tcell.GetColor(config.Config.BGColor)
+	}
+}
 
 func setBoxAttr(box *tview.Box, title string) {
 	box.SetBorder(true)
 	box.SetTitleAlign(tview.AlignLeft)
 	box.SetTitle(title)
-	box.SetBackgroundColor(tcell.ColorDefault)
+	box.SetBackgroundColor(bg)
 	box.SetBorderColor(tcell.GetColor(config.Config.FrameColor))
 	box.SetTitleColor(tcell.GetColor(config.Config.FrameColor))
 }
@@ -44,7 +51,7 @@ func drawChat() (*tview.Grid, *tview.InputField, *tview.TextView) {
 	setBoxAttr(messagesView.Box, "Messages")
 
 	input := tview.NewInputField()
-	input.SetFormAttributes(0, tcell.ColorDefault, tcell.ColorDefault, tcell.ColorDefault, tcell.ColorDefault)
+	input.SetFormAttributes(0, tcell.ColorDefault, bg, tcell.ColorDefault, bg)
 	setBoxAttr(input.Box, "Send")
 
 	chatGrid.
