@@ -4,7 +4,6 @@ import (
 	"bili/config"
 	"encoding/json"
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -19,6 +18,7 @@ type DanmuClient struct {
 	auth          bg.CookieAuth
 	conn          *websocket.Conn
 	unzlibChannel chan []byte
+	isClosed      bool
 }
 
 type OnlineRankUser struct {
@@ -74,29 +74,20 @@ type handShakeInfo struct {
 	Key       string `json:"key"`
 }
 
-func (d *DanmuClient) connect() {
+func (d *DanmuClient) connect() error {
 	var (
-		r     *requests.Response
-		err   error
-		jm    []byte
-		retry = 0
+		r   *requests.Response
+		err error
+		jm  []byte
 	)
 
 	var getDanmuInfo = "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=%d&type=0"
 
-	for retry < 3 {
-		r, err = requests.Get(fmt.Sprintf(getDanmuInfo, d.roomID))
-		if err != nil {
-			fmt.Println("request.Get DanmuInfo: ", err)
-			retry++
-			time.Sleep(1 * time.Second)
-		} else {
-			retry = 0
-			break
-		}
+	r, err = requests.Get(fmt.Sprintf(getDanmuInfo, d.roomID))
+	if err != nil {
+		time.Sleep(1 * time.Second)
 	}
 
-	fmt.Println("获取弹幕服务器")
 	token := gjson.Get(r.Text(), "data.token").String()
 	hostList := []string{}
 	gjson.Get(r.Text(), "data.host_list").ForEach(func(key, value gjson.Result) bool {
@@ -112,64 +103,73 @@ func (d *DanmuClient) connect() {
 		Type:      2,
 		Key:       token,
 	}
-
-	for retry < 3 {
-		for _, h := range hostList {
-			d.conn, _, err = websocket.DefaultDialer.Dial(fmt.Sprintf("wss://%s:443/sub", h), nil)
-			if err != nil {
-				fmt.Println("websocket.Dial: ", err)
-				continue
-			}
-			fmt.Printf("连接弹幕服务器[%s]成功\n", hostList[0])
-			break
-		}
+	for _, h := range hostList {
+		d.conn, _, err = websocket.DefaultDialer.Dial(fmt.Sprintf("wss://%s:443/sub", h), nil)
 		if err != nil {
-			retry++
-			fmt.Println("websocket.Dial Error")
-			time.Sleep(1 * time.Second)
+			continue
 		}
-		jm, err = json.Marshal(hsInfo)
-		if err != nil {
-			retry++
-			fmt.Println("json.Marshal: ", err)
-			time.Sleep(1 * time.Second)
-		} else {
-			retry = 0
-			break
-		}
+		break
+	}
+	if err != nil {
+		return err
+	}
+	jm, err = json.Marshal(hsInfo)
+	if err != nil {
+		return err
 	}
 
-	for retry < 3 {
-		err = d.sendPackage(0, 16, 1, 7, 1, jm)
-		if err != nil {
-			retry++
-			fmt.Println("Conn SendPackage: ", err)
-			time.Sleep(1 * time.Second)
-		} else {
-			fmt.Printf("连接房间[%d]成功\n", d.roomID)
-			break
-		}
+	err = d.sendPackage(0, 16, 1, 7, 1, jm)
+	return err
+}
+
+func (d *DanmuClient) getHistory(busChan chan DanmuMsg) {
+	historyApi := fmt.Sprintf("https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory?roomid=%d", d.roomID)
+	r, err := requests.Get(historyApi)
+	if err != nil {
+		return
 	}
 
-	fmt.Println("尝试链接bilibili次数: ", retry+1)
-	if retry == 3 {
-		os.Exit(0)
+	histories := gjson.Get(r.Text(), "data.room").Array()
+	for _, history := range histories {
+		t, _ := time.Parse("2006-01-02 15:04:05", history.Get("timeline").String())
+		danmu := DanmuMsg{
+			Author:  history.Get("nickname").String(),
+			Content: history.Get("text").String(),
+			Type:    "DANMU_MSG",
+			Time:    t,
+		}
+		busChan <- danmu
 	}
 }
 
-func (d *DanmuClient) heartBeat() {
+func (d *DanmuClient) heartBeat(msgChan chan DanmuMsg) {
 	for {
+		if d.isClosed {
+			return
+		}
 		obj := []byte("5b6f626a656374204f626a6563745d")
 		if err := d.sendPackage(0, 16, 1, 2, 1, obj); err != nil {
-			fmt.Println("heart beat err: ", err)
+			msgChan <- DanmuMsg{
+				// Author
+				// Content string
+				// Type    string
+			}
 			continue
 		}
 		time.Sleep(30 * time.Second)
 	}
 }
+
+// fuck 每次启动总容易失败panic
 func (d *DanmuClient) receiveRawMsg(busChan chan DanmuMsg) {
 	for {
-		_, rawMsg, _ := d.conn.ReadMessage()
+		if d.isClosed {
+			return
+		}
+		_, rawMsg, err := d.conn.ReadMessage()
+		if err != nil {
+			d.isClosed = true
+		}
 		if len(rawMsg) >= 8 && rawMsg[7] == 2 {
 			msgs := splitMsg(zlibUnCompress(rawMsg[16:]))
 			for _, msg := range msgs {
@@ -212,6 +212,10 @@ func (d *DanmuClient) receiveRawMsg(busChan chan DanmuMsg) {
 
 func (d *DanmuClient) syncRoomInfo(roomInfoChan chan RoomInfo) {
 	for {
+		if d.isClosed {
+			return
+		}
+
 		roomInfoApi := fmt.Sprintf("https://api.live.bilibili.com/room/v1/room/get_info?room_id=%d", d.roomID)
 		roomInfo := new(RoomInfo)
 		roomInfo.OnlineRankUsers = make([]OnlineRankUser, 0)
@@ -257,36 +261,53 @@ func (d *DanmuClient) syncRoomInfo(roomInfoChan chan RoomInfo) {
 	}
 }
 
-func (d *DanmuClient) getHistory(busChan chan DanmuMsg) {
-	historyApi := fmt.Sprintf("https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory?roomid=%d", d.roomID)
-	r, err := requests.Get(historyApi)
-	if err != nil {
-		return
+// 总是会崩溃，不如直接重启
+func supervisor(busChan chan DanmuMsg, roomInfoChan chan RoomInfo) {
+	busChan <- DanmuMsg{
+		Author:  "system",
+		Content: "弹幕服务器初始化中",
+		Type:    "NOTICE_MSG",
+		Time:    time.Now(),
 	}
 
-	histories := gjson.Get(r.Text(), "data.room").Array()
-	for _, history := range histories {
-		t, _ := time.Parse("2006-01-02 15:04:05", history.Get("timeline").String())
-		danmu := DanmuMsg{
-			Author:  history.Get("nickname").String(),
-			Content: history.Get("text").String(),
-			Type:    "DANMU_MSG",
-			Time:    t,
-		}
-		busChan <- danmu
-	}
-}
-
-func Run(busChan chan DanmuMsg, roomInfoChan chan RoomInfo) {
 	dc := DanmuClient{
 		roomID:        uint32(config.Config.RoomId),
 		auth:          config.Auth,
 		conn:          new(websocket.Conn),
 		unzlibChannel: make(chan []byte, 100),
 	}
-	dc.connect()
-	go dc.heartBeat()
+
+	defer func() {
+		busChan <- DanmuMsg{
+			Author:  "system",
+			Content: "弹幕服务器已断开，正在重连",
+			Type:    "NOTICE_MSG",
+			Time:    time.Now(),
+		}
+		dc.isClosed = true
+		dc.conn.Close()
+		time.Sleep(1 * time.Second)
+		supervisor(busChan, roomInfoChan)
+	}()
+
+	err := dc.connect()
+	if err != nil {
+		panic(err)
+	}
+
+	go dc.getHistory(busChan)
 	go dc.receiveRawMsg(busChan)
 	go dc.syncRoomInfo(roomInfoChan)
-	go dc.getHistory(busChan)
+	go dc.heartBeat(busChan)
+
+	for {
+		time.Sleep(1 * time.Second)
+		if dc.isClosed {
+			return
+		}
+	}
+}
+
+func Run(busChan chan DanmuMsg, roomInfoChan chan RoomInfo) {
+	go supervisor(busChan, roomInfoChan)
 }
