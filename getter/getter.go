@@ -122,7 +122,13 @@ func (d *DanmuClient) connect() error {
 	return err
 }
 
+var historied = false
+
 func (d *DanmuClient) getHistory(busChan chan DanmuMsg) {
+	if historied {
+		return
+	}
+
 	historyApi := fmt.Sprintf("https://api.live.bilibili.com/xlive/web-room/v1/dM/gethistory?roomid=%d", d.roomID)
 	r, err := requests.Get(historyApi)
 	if err != nil {
@@ -140,6 +146,7 @@ func (d *DanmuClient) getHistory(busChan chan DanmuMsg) {
 		}
 		busChan <- danmu
 	}
+	historied = true
 }
 
 func (d *DanmuClient) heartBeat(msgChan chan DanmuMsg) {
