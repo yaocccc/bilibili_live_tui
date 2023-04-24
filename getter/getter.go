@@ -19,7 +19,6 @@ type DanmuClient struct {
 	conn          *websocket.Conn
 	unzlibChannel chan []byte
 	isClosed      bool
-	inited        bool
 }
 
 type OnlineRankUser struct {
@@ -179,16 +178,6 @@ func (d *DanmuClient) receiveRawMsg(busChan chan DanmuMsg) {
 			d.isClosed = true
 		}
 		if len(rawMsg) >= 8 && rawMsg[7] == 2 {
-			if !d.inited {
-				d.inited = true
-				busChan <- DanmuMsg{
-					Author:  "system",
-					Content: ":)",
-					Type:    "NOTICE_MSG",
-					Time:    time.Now(),
-				}
-			}
-
 			msgs := splitMsg(zlibUnCompress(rawMsg[16:]))
 			for _, msg := range msgs {
 				uz := msg[16:]
@@ -281,13 +270,6 @@ func (d *DanmuClient) syncRoomInfo(roomInfoChan chan RoomInfo) {
 
 // 总是会崩溃，不如直接重启
 func supervisor(busChan chan DanmuMsg, roomInfoChan chan RoomInfo) {
-	busChan <- DanmuMsg{
-		Author:  "system",
-		Content: "弹幕服务器初始化中",
-		Type:    "NOTICE_MSG",
-		Time:    time.Now(),
-	}
-
 	dc := DanmuClient{
 		roomID:        uint32(config.Config.RoomId),
 		auth:          config.Auth,
@@ -298,7 +280,7 @@ func supervisor(busChan chan DanmuMsg, roomInfoChan chan RoomInfo) {
 	defer func() {
 		busChan <- DanmuMsg{
 			Author:  "system",
-			Content: "弹幕服务器已断开，正在重连",
+			Content: "弹幕服务器已断开，正在重连 :)",
 			Type:    "NOTICE_MSG",
 			Time:    time.Now(),
 		}
