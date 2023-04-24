@@ -19,6 +19,7 @@ type DanmuClient struct {
 	conn          *websocket.Conn
 	unzlibChannel chan []byte
 	isClosed      bool
+	inited        bool
 }
 
 type OnlineRankUser struct {
@@ -178,6 +179,16 @@ func (d *DanmuClient) receiveRawMsg(busChan chan DanmuMsg) {
 			d.isClosed = true
 		}
 		if len(rawMsg) >= 8 && rawMsg[7] == 2 {
+			if !d.inited {
+				d.inited = true
+				busChan <- DanmuMsg{
+					Author:  "system",
+					Content: ":)",
+					Type:    "NOTICE_MSG",
+					Time:    time.Now(),
+				}
+			}
+
 			msgs := splitMsg(zlibUnCompress(rawMsg[16:]))
 			for _, msg := range msgs {
 				uz := msg[16:]
