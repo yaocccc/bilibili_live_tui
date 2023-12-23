@@ -1,6 +1,7 @@
 package getter
 
 import (
+	"net/http"
 	"bili/config"
 	"encoding/json"
 	"fmt"
@@ -103,8 +104,18 @@ func (d *DanmuClient) connect() error {
 		Type:      2,
 		Key:       token,
 	}
+	headers := make(http.Header)
+	headers.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36")
+	headers.Set("Accept", "*/*")
+	headers.Set("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2")
+	headers.Set("Accept-Encoding", "gzip, deflate, br")
+	headers.Set("Origin", "https://live.bilibili.com")
+	headers.Set("Cookie", config.Config.Cookie)
+	headers.Set("Pragma", "no-cache")
+	headers.Set("Cache-Control", "no-cache")
+	headers.Set("Custom-Header", "CustomValue")
 	for _, h := range hostList {
-		d.conn, _, err = websocket.DefaultDialer.Dial(fmt.Sprintf("wss://%s:443/sub", h), nil)
+		d.conn, _, err = websocket.DefaultDialer.Dial(fmt.Sprintf("wss://%s:443/sub", h), headers)
 		if err != nil {
 			continue
 		}
