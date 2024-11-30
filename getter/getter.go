@@ -1,16 +1,18 @@
 package getter
 
 import (
-	"net/http"
 	"bili/config"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"time"
 
+	myhttp "github.com/BYT0723/go-tools/http"
+
+	"github.com/asmcos/requests"
 	"github.com/gorilla/websocket"
 	bg "github.com/iyear/biligo"
 
-	"github.com/asmcos/requests"
 	"github.com/tidwall/gjson"
 )
 
@@ -66,71 +68,75 @@ type receivedInfo struct {
 }
 
 type handShakeInfo struct {
-	UID       uint8  `json:"uid"`
-	Roomid    uint32 `json:"roomid"`
-	Protover  uint8  `json:"protover"`
-	Platform  string `json:"platform"`
-	Clientver string `json:"clientver"`
-	Type      uint8  `json:"type"`
-	Key       string `json:"key"`
+	UID      uint32 `json:"uid"`
+	Roomid   uint32 `json:"roomid"`
+	Protover uint8  `json:"protover"`
+	Buvid    string `json:"buvid"`
+	Platform string `json:"platform"`
+	Type     uint8  `json:"type"`
+	Key      string `json:"key"`
 }
 
-func (d *DanmuClient) connect() error {
+func (d *DanmuClient) connect() (err error) {
 	var (
-		r   *requests.Response
-		err error
-		jm  []byte
+		uid    uint32
+		body   []byte
+		header = http.Header{
+			"Cookie": []string{config.Config.Cookie},
+		}
 	)
 
-	var getDanmuInfo = "https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=%d&type=0"
-
-	r, err = requests.Get(fmt.Sprintf(getDanmuInfo, d.roomID))
+	_, body, err = myhttp.Get("https://api.bilibili.com/x/web-interface/nav", header, nil)
 	if err != nil {
-		time.Sleep(1 * time.Second)
+		return err
+	}
+	uid = uint32(gjson.GetBytes(body, "data.mid").Int())
+
+	_, body, err = myhttp.Get(fmt.Sprintf("https://api.live.bilibili.com/xlive/web-room/v1/index/getDanmuInfo?id=%d", d.roomID), header, nil)
+	if err != nil {
+		return err
 	}
 
-	token := gjson.Get(r.Text(), "data.token").String()
+	token := gjson.GetBytes(body, "data.token").String()
 	hostList := []string{}
-	gjson.Get(r.Text(), "data.host_list").ForEach(func(key, value gjson.Result) bool {
+	gjson.GetBytes(body, "data.host_list").ForEach(func(key, value gjson.Result) bool {
 		hostList = append(hostList, value.Get("host").String())
 		return true
 	})
 	hsInfo := handShakeInfo{
-		UID:       0,
-		Roomid:    d.roomID,
-		Protover:  2,
-		Platform:  "web",
-		Clientver: "1.10.2",
-		Type:      2,
-		Key:       token,
+		UID:      uid,
+		Roomid:   d.roomID,
+		Protover: 2,
+		Platform: "web",
+		Type:     2,
+		Key:      token,
 	}
-	headers := make(http.Header)
-	headers.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36")
-	headers.Set("Accept", "*/*")
-	headers.Set("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2")
-	headers.Set("Accept-Encoding", "gzip, deflate, br")
-	headers.Set("Origin", "https://live.bilibili.com")
-	headers.Set("Cookie", config.Config.Cookie)
-	headers.Set("Pragma", "no-cache")
-	headers.Set("Cache-Control", "no-cache")
-	headers.Set("Custom-Header", "CustomValue")
+
+	header.Set("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36")
+	header.Set("Accept", "*/*")
+	header.Set("Accept-Language", "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2")
+	header.Set("Accept-Encoding", "gzip, deflate, br")
+	header.Set("Origin", "https://live.bilibili.com")
+	header.Set("Pragma", "no-cache")
+	header.Set("Cache-Control", "no-cache")
+	header.Set("Custom-Header", "CustomValue")
 	for _, h := range hostList {
-		d.conn, _, err = websocket.DefaultDialer.Dial(fmt.Sprintf("wss://%s:443/sub", h), headers)
+		d.conn, _, err = websocket.DefaultDialer.Dial(fmt.Sprintf("wss://%s:443/sub", h), header)
 		if err != nil {
 			continue
 		}
 		break
 	}
 	if err != nil {
-		return err
+		return
 	}
-	jm, err = json.Marshal(hsInfo)
+	body, err = json.Marshal(hsInfo)
 	if err != nil {
-		return err
+		return
 	}
 
-	err = d.sendPackage(0, 16, 1, 7, 1, jm)
-	return err
+	err = d.sendPackage(0, 16, 1, 7, 1, body)
+	return
 }
 
 var historied = false
